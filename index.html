@@ -145,11 +145,43 @@
                 </div>
             </section>
 
-            <section id="reports" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Monthly Reports</h2>
-                <div id="report-table-body"></div>
-            </section>
+            <section id="reports" class="hidden animate-fade-in">
+    <h2 class="text-3xl font-extrabold mb-8 text-slate-800">Monthly Financial Statement</h2>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm mb-8 flex flex-wrap gap-4 items-end border border-slate-100">
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Month</label>
+            <select id="reportFilterMonth" class="border p-3 rounded-lg w-64 outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="April 2026">April 2026</option>
+                <option value="May 2026">May 2026</option>
+                <option value="June 2026">June 2026</option>
+            </select>
+        </div>
+        <button onclick="generateMonthlyReport()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">Generate Report</button>
+        <button onclick="window.print()" class="bg-slate-100 text-slate-700 px-8 py-3 rounded-lg font-bold hover:bg-slate-200 transition">Print PDF</button>
+    </div>
 
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-800 text-white">
+                <tr>
+                    <th class="p-4 uppercase text-xs font-bold">Date</th>
+                    <th class="p-4 uppercase text-xs font-bold">Name</th>
+                    <th class="p-4 uppercase text-xs font-bold">Category</th>
+                    <th class="p-4 uppercase text-xs font-bold text-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody id="report-table-body" class="divide-y divide-slate-100">
+                </tbody>
+            <tfoot class="bg-slate-50 font-black text-slate-800">
+                <tr>
+                    <td colspan="3" class="p-5 text-right text-sm">MONTHLY NET BALANCE:</td>
+                    <td id="report-total" class="p-5 text-right text-xl text-blue-700 font-black tracking-tight">₹0</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</section>
             <section id="data-manager" class="hidden">
                 <h2 class="text-2xl font-bold mb-6">Cloud Database</h2>
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden"><table class="w-full text-left"><tbody id="manager-table-body"></tbody></table></div>
@@ -320,6 +352,49 @@
         }
 
         async function deleteDoc(id) { if(confirm("Permanently delete?")) await db.collection("transactions").doc(id).delete(); }
+
+        function generateMonthlyReport() {
+    const selectedMonth = document.getElementById('reportFilterMonth').value;
+    const tbody = document.getElementById('report-table-body');
+    const totalDisplay = document.getElementById('report-total');
+    
+    tbody.innerHTML = ""; // Clear old data
+    let netBalance = 0;
+
+    // Combine income and expense and filter by month
+    const allTransactions = [...data.income, ...data.expense];
+    const filtered = allTransactions.filter(item => item.month === selectedMonth);
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No transactions found for ${selectedMonth}</td></tr>`;
+        totalDisplay.innerText = "₹0";
+        return;
+    }
+
+    filtered.forEach(item => {
+        const isIncome = item.type === 'income';
+        netBalance += isIncome ? item.amount : -item.amount;
+
+        const row = `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="p-4 text-sm text-slate-600">${item.date}</td>
+                <td class="p-4 font-bold text-slate-800 uppercase">${item.name}</td>
+                <td class="p-4 text-xs font-bold">
+                    <span class="${isIncome ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded">
+                        ${item.category.toUpperCase()}
+                    </span>
+                </td>
+                <td class="p-4 text-right font-black ${isIncome ? 'text-green-600' : 'text-red-600'}">
+                    ${isIncome ? '+' : '-'}₹${item.amount}
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    totalDisplay.innerText = `₹${netBalance}`;
+    totalDisplay.className = `p-5 text-right text-xl font-black ${netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+}
     </script>
 </body>
 </html>
