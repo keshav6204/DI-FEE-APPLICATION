@@ -112,50 +112,98 @@
                 </div>
             </section>
 
-            <section id="salary-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-red-600">Teacher Salary Slip</h2>
-                <div class="space-y-4">
-                    <input type="text" id="salaryDate" placeholder="Date (DD/MM/YYYY) - Optional" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="teacherName" placeholder="Teacher Name" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="subject" placeholder="Department" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="baseSalary" placeholder="Base Salary (₹)" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="bonus" placeholder="Bonus (₹)" class="w-full border p-3 rounded-xl">
-                    <select id="salaryMonth" class="w-full border p-3 rounded-xl">
-                        <option value="April 2026">April 2026</option>
-                    </select>
-                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg">Download Slip</button>
-                </div>
-            </section>
+            <section id="fee-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700">Collect Student Fee</h2>
+    <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+            <input type="text" id="feeDate" placeholder="Date (DD/MM/YYYY)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="text" id="dueDate" placeholder="Due Date (Optional)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-400 text-red-600 font-bold">
+        </div>
+        <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="text" id="studentClass" placeholder="Class/Batch" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+        <select id="feeMonth" class="w-full border p-3 rounded-xl">
+            <option value="April 2026">April 2026</option><option value="May 2026">May 2026</option>
+        </select>
+        <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition transform active:scale-95">Generate Receipt & Sync</button>
+    </div>
+</section>
 
-            <section id="dashboard" class="block"><h2 class="text-3xl font-extrabold mb-8">Financial Overview</h2><canvas id="financeChart"></canvas></section>
-        </main>
+<div id="receipt-template" class="hidden">
+    <div class="header-center">
+        <img src="logo.jpeg" class="institute-logo">
+        <div class="institute-name">DEEPAK INSTITUTE</div>
+        <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | 📞☎️ +91 9716263718</div>
+        <div class="slip-title">OFFICIAL FEE RECEIPT</div>
+    </div>
+    
+    <div class="data-row"><span class="data-label">Receipt Number:</span><span id="r-id" class="data-value text-blue-800"></span></div>
+    <div class="data-row"><span class="data-label">Generation Date:</span><span id="r-date" class="data-value"></span></div>
+    <div class="data-row"><span class="data-label">Student Name:</span><span id="r-name" class="data-value uppercase"></span></div>
+    <div class="data-row"><span class="data-label">Class/Batch:</span><span id="r-class" class="data-value"></span></div>
+    <div class="data-row"><span class="data-label">Billed Month:</span><span id="r-month" class="data-value"></span></div>
+    <div class="data-row bg-red-50 px-2 rounded"><span class="data-label text-red-600">Next Payment Due Date:</span><span id="r-due" class="data-value text-red-600 font-black"></span></div>
+
+    <div class="total-banner shadow-lg">
+        <span class="text-xl font-bold uppercase tracking-widest opacity-80">Total Amount Paid</span>
+        <span class="text-4xl font-black italic">₹<span id="r-amount"></span></span>
     </div>
 
-    <div id="receipt-template" class="hidden">
-        <div class="header-center">
-            <img src="logo.jpeg" class="institute-logo">
-            <div class="institute-name">DEEPAK INSTITUTE</div>
-            <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | 📞☎️ +91 9716263718</div>
-            <div class="slip-title">OFFICIAL FEE RECEIPT</div>
-        </div>
-        
-        <div class="info-row"><span class="info-label">Receipt Number:</span><span id="r-id" class="info-value"></span></div>
-        <div class="info-row"><span class="info-label">Generation Date:</span><span id="r-date" class="info-value"></span></div>
-        <div class="info-row"><span class="info-label">Student Name:</span><span id="r-name" class="info-value uppercase"></span></div>
-        <div class="info-row"><span class="info-label">Class / Batch:</span><span id="r-class" class="info-value"></span></div>
-        <div class="info-row"><span class="info-label">Billing Month:</span><span id="r-month" class="info-value"></span></div>
-
-        <div class="total-section">
-            <span class="text-xl font-bold">TOTAL AMOUNT PAID</span>
-            <span class="text-4xl font-black">₹<span id="r-amount"></span></span>
-        </div>
-
-        <div class="mt-40 flex justify-between px-10">
-            <div class="signature-line">Student/Parent Sign</div>
-            <div class="text-center"><img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]"><div class="signature-line">Director Sign</div></div>
+    <div class="mt-40 flex justify-between px-10">
+        <div class="signature-line">Student/Parent Sign</div>
+        <div class="text-center">
+            <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
+            <div class="signature-line">Director Sign</div>
         </div>
     </div>
+</div>
 
+<script>
+    // 3. JavaScript Function Mein mapping update karein
+    async function generateFeeReceipt() {
+        const name = document.getElementById('studentName').value;
+        const amount = parseFloat(document.getElementById('feeAmount').value);
+        const sClass = document.getElementById('studentClass').value;
+        const month = document.getElementById('feeMonth').value;
+        const effectiveDate = document.getElementById('feeDate').value || new Date().toLocaleDateString('en-GB');
+        const nextDueDate = document.getElementById('dueDate').value || "N/A"; // Due Date logic
+
+        if (!name || isNaN(amount)) return alert("Check student details");
+
+        try {
+            const counterRef = db.collection("counters").doc("receipt_counter");
+            const newVoucherNo = await db.runTransaction(async (transaction) => {
+                const counterDoc = await transaction.get(counterRef);
+                let nextNum = counterDoc.data().currentValue + 1;
+                transaction.update(counterRef, { currentValue: nextNum });
+                return nextNum;
+            });
+
+            // UI Pe reflect karna
+            document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
+            document.getElementById('r-name').innerText = name;
+            document.getElementById('r-class').innerText = sClass;
+            document.getElementById('r-amount').innerText = amount;
+            document.getElementById('r-month').innerText = month;
+            document.getElementById('r-date').innerText = effectiveDate;
+            document.getElementById('r-due').innerText = nextDueDate; // Show Due Date on PDF
+
+            const el = document.getElementById('receipt-template');
+            el.classList.remove('hidden');
+            
+            setTimeout(() => {
+                html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden'));
+            }, 800);
+
+            // Cloud Mein bhi Due Date save karna
+            await db.collection("transactions").add({
+                name, amount, class: sClass, month, date: effectiveDate, dueDate: nextDueDate, 
+                type:'income', category:'Fee', voucherNo: newVoucherNo, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+        } catch (e) { alert("Error: " + e.message); }
+    }
+</script>
     <div id="salary-template" class="hidden">
         <div class="header-center">
             <img src="logo.jpeg" class="institute-logo">
