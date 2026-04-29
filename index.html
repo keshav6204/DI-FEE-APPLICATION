@@ -33,44 +33,43 @@
             main { width: 100%; padding: 0; }
         }
 
-        /* FIXED CANVAS SIZE: NO TEXT CUTTING */
+        /* FIXED CANVAS SIZE FOR PDF ACCURACY */
         #receipt-template, #salary-template {
-            width: 794px; /* A4 Width */
+            width: 794px; /* A4 Standard Width */
             background: white;
-            padding: 60px;
+            padding: 50px;
             margin: 0 auto;
             color: black;
-            box-sizing: border-box;
         }
 
-        .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 25px; margin-bottom: 40px; }
-        .institute-logo { height: 85px; width: auto; margin: 0 auto 15px auto; }
-        .institute-name { font-size: 32px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; }
-        .slip-title { background: #f1f5f9; display: inline-block; padding: 8px 30px; border-radius: 30px; font-weight: bold; margin-top: 20px; color: #334155; }
+        .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 35px; }
+        .institute-logo { height: 80px; width: auto; margin: 0 auto 12px auto; }
+        .institute-name { font-size: 30px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1px; }
+        .slip-title { background: #f1f5f9; display: inline-block; padding: 6px 25px; border-radius: 25px; font-weight: bold; margin-top: 15px; font-size: 14px; color: #334155; }
         
-        /* VERTICAL INFO ROWS: PREVENTS OVERLAP */
-        .info-row {
+        /* VERTICAL ROW LAYOUT: PREVENTS ALL OVERLAPPING */
+        .data-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            padding: 15px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f1f5f9;
-            font-size: 18px;
+            font-size: 16px;
         }
-        .info-label { color: #64748b; font-weight: 500; min-width: 200px; }
-        .info-value { font-weight: 700; color: #1e293b; text-align: right; flex: 1; word-wrap: break-word; }
+        .data-label { color: #64748b; font-weight: 500; }
+        .data-value { font-weight: 700; color: #1e293b; text-align: right; }
 
-        .total-section { 
+        .total-banner { 
             background: #1e3a8a; 
             color: white !important; 
-            padding: 30px; 
-            border-radius: 15px; 
+            padding: 25px; 
+            border-radius: 12px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             margin-top: 50px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
         }
-        .signature-line { border-top: 2px solid #333; width: 200px; margin: 70px auto 10px auto; text-align: center; font-size: 14px; font-weight: bold; }
+        .signature-line { border-top: 2px solid #333; width: 180px; margin: 60px auto 5px auto; text-align: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -81,8 +80,8 @@
             <h2 class="text-2xl font-bold mb-6">Director Login</h2>
             <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
             <input type="password" id="login-pass" placeholder="Password" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Sign In</button>
-            <p id="login-error" class="text-red-500 mt-2 text-sm hidden font-medium"></p>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Sign In</button>
+            <p id="login-error" class="text-red-500 mt-2 text-sm hidden"></p>
         </div>
     </div>
 
@@ -90,149 +89,198 @@
         <nav class="w-full md:w-64 bg-slate-800 text-white min-h-screen p-5 shadow-xl no-print">
             <h1 class="text-2xl font-black mb-10 text-blue-400 border-b border-slate-700 pb-4">Deepak Institute</h1>
             <ul class="space-y-4 font-semibold text-sm">
-                <li><button onclick="showSection('dashboard')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Dashboard</button></li>
-                <li><button onclick="showSection('fee-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Collect Fees</button></li>
-                <li><button onclick="showSection('salary-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Pay Salary</button></li>
-                <li><button onclick="showSection('reports')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Reports</button></li>
+                <li><button onclick="showSection('dashboard')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Dashboard</button></li>
+                <li><button onclick="showSection('fee-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Collect Fees</button></li>
+                <li><button onclick="showSection('salary-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Pay Salary</button></li>
+                <li><button onclick="showSection('reports')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Reports</button></li>
+                <li><button onclick="showDataManager()" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg opacity-40">Manage Cloud</button></li>
             </ul>
         </nav>
 
         <main class="flex-1 p-6 md:p-10">
-            <section id="fee-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-blue-700">Fee Collection</h2>
-                <div class="space-y-4">
-                    <input type="text" id="feeDate" placeholder="Date (DD/MM/YYYY) - Optional" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="studentClass" placeholder="Class/Batch" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl">
-                    <select id="feeMonth" class="w-full border p-3 rounded-xl">
-                        <option value="April 2026">April 2026</option><option value="May 2026">May 2026</option>
-                    </select>
-                    <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">Download Receipt</button>
+            <section id="dashboard" class="block">
+                <h2 class="text-3xl font-extrabold mb-8">Analytical Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-green-500">
+                        <p class="text-slate-400 uppercase text-xs font-bold">Revenue</p>
+                        <h3 id="total-income" class="text-3xl font-black text-green-600">₹0</h3>
+                    </div>
+                    <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-red-500">
+                        <p class="text-slate-400 uppercase text-xs font-bold">Expenses</p>
+                        <h3 id="total-expense" class="text-3xl font-black text-red-600">₹0</h3>
+                    </div>
+                    <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-blue-500">
+                        <p class="text-slate-400 uppercase text-xs font-bold">Net Profit</p>
+                        <h3 id="net-profit" class="text-3xl font-black text-blue-600">₹0</h3>
+                    </div>
                 </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"><canvas id="financeChart" class="max-h-80"></canvas></div>
             </section>
 
             <section id="fee-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
-    <h2 class="text-2xl font-bold mb-6 text-blue-700">Collect Student Fee</h2>
-    <div class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
-            <input type="text" id="feeDate" placeholder="Date (DD/MM/YYYY)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-            <input type="text" id="dueDate" placeholder="Due Date (Optional)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-400 text-red-600 font-bold">
+                <h2 class="text-2xl font-bold mb-6 text-blue-700">Student Fee Collection</h2>
+                <div class="space-y-4">
+                    <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="studentClass" placeholder="Batch/Class" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl">
+                    <select id="feeMonth" class="w-full border p-3 rounded-xl">
+                        <option value="Janurary 2026">Janurary 2026</option>
+                        <option value="Februrary 2026">February 2026</option>
+                        <option value="March 2026">March 2026</option>
+                        <option value="April 2026">April 2026</option>
+                        <option value="May 2026">May 2026</option>
+                        <option value="June 2026">June 2026</option>
+                        <option value="July 2026">July 2026</option>
+                        <option value="August 2026">August 2026</option>
+                        <option value="September 2026">September 2026</option>
+                        <option value="October 2026">October 2026</option>
+                        <option value="November 2026">November 2026</option>
+                        <option value="December 2026">December 2026</option>
+                    </select>
+                    <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">Save & Download PDF</button>
+                </div>
+            </section>
+
+            <section id="salary-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
+                <h2 class="text-2xl font-bold mb-6 text-red-600">Teacher Salary </h2>
+                <div class="space-y-4">
+                    <input type="text" id="teacherName" placeholder="Teacher Full Name" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="subject" placeholder="Department" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="baseSalary" placeholder="Base Salary (₹)" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="bonus" placeholder="Bonus/Incentive (₹)" class="w-full border p-3 rounded-xl">
+                    <select id="salaryMonth" class="w-full border p-3 rounded-xl">
+                        <option value="Janurary 2026">Janurary 2026</option>
+                        <option value="Februrary 2026">February 2026</option>
+                        <option value="March 2026">March 2026</option>
+                        <option value="April 2026">April 2026</option>
+                        <option value="May 2026">May 2026</option>
+                        <option value="June 2026">June 2026</option>
+                        <option value="July 2026">July 2026</option>
+                        <option value="August 2026">August 2026</option>
+                        <option value="September 2026">September 2026</option>
+                        <option value="October 2026">October 2026</option>
+                        <option value="November 2026">November 2026</option>
+                        <option value="December 2026">December 2026</option>
+                    </select>
+                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-700 transition">Pay & Download Slip</button>
+                </div>
+            </section>
+
+            <section id="reports" class="hidden animate-fade-in">
+    <h2 class="text-3xl font-extrabold mb-8 text-slate-800">Monthly Financial Statement</h2>
+    
+    <div class="bg-white p-6 rounded-xl shadow-sm mb-8 flex flex-wrap gap-4 items-end border border-slate-100">
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Month</label>
+            <select id="reportFilterMonth" class="border p-3 rounded-lg w-64 outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Janurary 2026">Janurary 2026</option>
+                        <option value="Februrary 2026">February 2026</option>
+                        <option value="March 2026">March 2026</option>
+                        <option value="April 2026">April 2026</option>
+                        <option value="May 2026">May 2026</option>
+                        <option value="June 2026">June 2026</option>
+                        <option value="July 2026">July 2026</option>
+                        <option value="August 2026">August 2026</option>
+                        <option value="September 2026">September 2026</option>
+                        <option value="October 2026">October 2026</option>
+                        <option value="November 2026">November 2026</option>
+                        <option value="December 2026">December 2026</option>
+            </select>
         </div>
-        <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-        <input type="text" id="studentClass" placeholder="Class/Batch" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-        <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
-        <select id="feeMonth" class="w-full border p-3 rounded-xl">
-            <option value="April 2026">April 2026</option><option value="May 2026">May 2026</option>
-        </select>
-        <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition transform active:scale-95">Generate Receipt & Sync</button>
+        <button onclick="generateMonthlyReport()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">Generate Report</button>
+        <button onclick="window.print()" class="bg-slate-100 text-slate-700 px-8 py-3 rounded-lg font-bold hover:bg-slate-200 transition">Print PDF</button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-800 text-white">
+                <tr>
+                    <th class="p-4 uppercase text-xs font-bold">Date</th>
+                    <th class="p-4 uppercase text-xs font-bold">Name</th>
+                    <th class="p-4 uppercase text-xs font-bold">Category</th>
+                    <th class="p-4 uppercase text-xs font-bold text-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody id="report-table-body" class="divide-y divide-slate-100">
+                </tbody>
+            <tfoot class="bg-slate-50 font-black text-slate-800">
+                <tr>
+                    <td colspan="3" class="p-5 text-right text-sm">MONTHLY NET BALANCE:</td>
+                    <td id="report-total" class="p-5 text-right text-xl text-blue-700 font-black tracking-tight">₹0</td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
 </section>
-
-<div id="receipt-template" class="hidden">
-    <div class="header-center">
-        <img src="logo.jpeg" class="institute-logo">
-        <div class="institute-name">DEEPAK INSTITUTE</div>
-        <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | 📞☎️ +91 9716263718</div>
-        <div class="slip-title">OFFICIAL FEE RECEIPT</div>
-    </div>
-    
-    <div class="data-row"><span class="data-label">Receipt Number:</span><span id="r-id" class="data-value text-blue-800"></span></div>
-    <div class="data-row"><span class="data-label">Generation Date:</span><span id="r-date" class="data-value"></span></div>
-    <div class="data-row"><span class="data-label">Student Name:</span><span id="r-name" class="data-value uppercase"></span></div>
-    <div class="data-row"><span class="data-label">Class/Batch:</span><span id="r-class" class="data-value"></span></div>
-    <div class="data-row"><span class="data-label">Billed Month:</span><span id="r-month" class="data-value"></span></div>
-    <div class="data-row bg-red-50 px-2 rounded"><span class="data-label text-red-600">Next Payment Due Date:</span><span id="r-due" class="data-value text-red-600 font-black"></span></div>
-
-    <div class="total-banner shadow-lg">
-        <span class="text-xl font-bold uppercase tracking-widest opacity-80">Total Amount Paid</span>
-        <span class="text-4xl font-black italic">₹<span id="r-amount"></span></span>
+            <section id="data-manager" class="hidden">
+                <h2 class="text-2xl font-bold mb-6">Cloud Database</h2>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden"><table class="w-full text-left"><tbody id="manager-table-body"></tbody></table></div>
+            </section>
+        </main>
     </div>
 
-    <div class="mt-40 flex justify-between px-10">
-        <div class="signature-line">Student/Parent Sign</div>
-        <div class="text-center">
-            <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
-            <div class="signature-line">Director Sign</div>
+    <div id="receipt-template" class="hidden">
+        <div class="header-center">
+            <img src="logo.jpeg" class="institute-logo">
+            <div class="institute-name">DEEPAK INSTITUTE</div>
+            <div class="institute-details"> Mandawali,West Vinod Nagar,New Delhi 110092 ☎️ +91 9716263718</div>
+            <div class="slip-title">STUDENT FEE RECEIPT</div>
+        </div>
+        
+        <div class="data-row"><span class="data-label">Receipt Number:</span><span id="r-id" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Generation Date:</span><span id="r-date" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Student Name:</span><span id="r-name" class="data-value uppercase"></span></div>
+        <div class="data-row"><span class="data-label">Class/Batch:</span><span id="r-class" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Billed Month:</span><span id="r-month" class="data-value"></span></div>
+
+        <div class="total-banner">
+            <span class="text-xl font-bold">TOTAL PAID AMOUNT</span>
+            <span class="text-4xl font-black">₹<span id="r-amount"></span></span>
+        </div>
+
+        <div class="mt-40 flex justify-between">
+            <div class="signature-line">Student/Parent</div>
+            <div class="text-center">
+                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
+                <div class="signature-line">Director Authorized</div>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    // 3. JavaScript Function Mein mapping update karein
-    async function generateFeeReceipt() {
-        const name = document.getElementById('studentName').value;
-        const amount = parseFloat(document.getElementById('feeAmount').value);
-        const sClass = document.getElementById('studentClass').value;
-        const month = document.getElementById('feeMonth').value;
-        const effectiveDate = document.getElementById('feeDate').value || new Date().toLocaleDateString('en-GB');
-        const nextDueDate = document.getElementById('dueDate').value || "N/A"; // Due Date logic
-
-        if (!name || isNaN(amount)) return alert("Check student details");
-
-        try {
-            const counterRef = db.collection("counters").doc("receipt_counter");
-            const newVoucherNo = await db.runTransaction(async (transaction) => {
-                const counterDoc = await transaction.get(counterRef);
-                let nextNum = counterDoc.data().currentValue + 1;
-                transaction.update(counterRef, { currentValue: nextNum });
-                return nextNum;
-            });
-
-            // UI Pe reflect karna
-            document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
-            document.getElementById('r-name').innerText = name;
-            document.getElementById('r-class').innerText = sClass;
-            document.getElementById('r-amount').innerText = amount;
-            document.getElementById('r-month').innerText = month;
-            document.getElementById('r-date').innerText = effectiveDate;
-            document.getElementById('r-due').innerText = nextDueDate; // Show Due Date on PDF
-
-            const el = document.getElementById('receipt-template');
-            el.classList.remove('hidden');
-            
-            setTimeout(() => {
-                html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden'));
-            }, 800);
-
-            // Cloud Mein bhi Due Date save karna
-            await db.collection("transactions").add({
-                name, amount, class: sClass, month, date: effectiveDate, dueDate: nextDueDate, 
-                type:'income', category:'Fee', voucherNo: newVoucherNo, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-        } catch (e) { alert("Error: " + e.message); }
-    }
-</script>
     <div id="salary-template" class="hidden">
         <div class="header-center">
             <img src="logo.jpeg" class="institute-logo">
             <div class="institute-name">DEEPAK INSTITUTE</div>
-            <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | 📞☎️ +91 9716263718</div>
-            <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
+            <div class="institute-details"> Mandawali,West Vinod Nagar,New Delhi 110092 ☎️ +91 9716263718</div>
+                                           
+            <div class="slip-title">SALARY SLIP</div>
         </div>
 
-        <div class="info-row"><span class="info-label">Voucher Number:</span><span id="v-id" class="info-value text-blue-800"></span></div>
-        <div class="info-row"><span class="info-label">Payment Date:</span><span id="v-date" class="info-value"></span></div>
-        <div class="info-row"><span class="info-label">Teacher Name:</span><span id="v-name" class="info-value uppercase"></span></div>
-        <div class="info-row"><span class="info-label">Department:</span><span id="v-dept" class="info-value"></span></div>
+        <div class="data-row"><span class="data-label">Slip ID:</span><span id="v-id" class="data-value text-blue-700"></span></div>
+        <div class="data-row"><span class="data-label">Payment Date:</span><span id="v-date" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Employee Name:</span><span id="v-name" class="data-value uppercase"></span></div>
+        <div class="data-row"><span class="data-label">Department:</span><span id="v-dept" class="data-value"></span></div>
 
-        <div class="total-section" style="background: #0f172a;">
-            <span class="text-xl font-bold">NET SALARY PAID</span>
+        <div class="total-banner" style="background: #0f172a;">
+            <span class="text-lg font-bold opacity-90">NET SALARY PAID</span>
             <span class="text-5xl font-black">₹<span id="v-total"></span></span>
         </div>
 
-        <div class="mt-32 flex justify-between px-10">
-            <div class="signature-line">Receiver Sign</div>
-            <div class="text-center"><img src="sign.jpeg" class="h-14 mx-auto mb-[-10px]"><div class="signature-line">Authorized Signatory</div></div>
+        <div class="mt-32 flex justify-between">
+            <div class="signature-line">Receiver Signature</div>
+            <div class="text-center">
+                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
+                <div class="signature-line">Authorized Signatory</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Auth / Sync Logic
+        // Auth Logic
         firebase.auth().onAuthStateChanged(user => {
-            if (user) { document.getElementById('login-screen').classList.add('hidden'); initializeSync(); }
-            else { document.getElementById('login-screen').classList.remove('hidden'); }
+            const login = document.getElementById('login-screen');
+            if (user) { login.classList.add('hidden'); initializeSync(); }
+            else { login.classList.remove('hidden'); }
         });
 
         async function handleLogin() {
@@ -243,84 +291,210 @@
         }
 
         let data = { income: [], expense: [] };
-        function showSection(id) { document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        let myChart = null;
 
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // A4 Optimized PDF Config
         const pdfOpt = {
             margin: 0,
             image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Date Logic: Director Input or Today
-        const getDisplayDate = (id) => document.getElementById(id).value || new Date().toLocaleDateString('en-GB');
+        const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-        async function generateFeeReceipt() {
-            const name = document.getElementById('studentName').value;
-            const amount = parseFloat(document.getElementById('feeAmount').value);
-            const date = getDisplayDate('feeDate');
-            if (!name || isNaN(amount)) return alert("Check Details");
+       async function generateFeeReceipt() {
+    const name = document.getElementById('studentName').value;
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+    const sClass = document.getElementById('studentClass').value;
+    const month = document.getElementById('feeMonth').value;
 
-            try {
-                const counterRef = db.collection("counters").doc("receipt_counter");
-                const nextNum = await db.runTransaction(async (t) => {
-                    const doc = await t.get(counterRef);
-                    let n = doc.data().currentValue + 1;
-                    t.update(counterRef, { currentValue: n });
-                    return n;
-                });
+    if (!name || isNaN(amount)) return alert("Check Details");
 
-                document.getElementById('r-id').innerText = "DI-" + String(nextNum).padStart(3, '0');
-                document.getElementById('r-name').innerText = name;
-                document.getElementById('r-class').innerText = document.getElementById('studentClass').value;
-                document.getElementById('r-amount').innerText = amount;
-                document.getElementById('r-month').innerText = document.getElementById('feeMonth').value;
-                document.getElementById('r-date').innerText = date;
+    try {
+        // 1. Counter Document ka reference lein
+        const counterRef = db.collection("counters").doc("receipt_counter");
 
-                const el = document.getElementById('receipt-template');
-                el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden')); }, 800);
-                
-                await db.collection("transactions").add({ name, amount, type:'income', category:'Fee', date, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            } catch (e) { alert("Error generating serial number"); }
-        }
+        // 2. Transaction use karein taaki Number clash na ho (Atomic Update)
+        const newReceiptNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) {
+                throw "Counter document does not exist!";
+            }
+
+            // Purane number mein +1 karein
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
+
+        // 3. Entry taiyaar karein naye Serial Number ke saath
+        const entry = {
+            receiptNo: newReceiptNo, // Random ID ki jagah 1, 2, 3...
+            name, amount, class: sClass, month, type: 'income',
+            category: 'Fee', date: getToday(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // 4. Cloud mein save karein
+        await db.collection("transactions").add(entry);
+
+        // 5. UI Update karein (Receipt No ko format karke dikhayein, e.g., DI-001)
+        document.getElementById('r-id').innerText = "DI-" + String(newReceiptNo).padStart(3, '0');
+        document.getElementById('r-name').innerText = name;
+        document.getElementById('r-class').innerText = sClass;
+        document.getElementById('r-amount').innerText = amount;
+        document.getElementById('r-month').innerText = month;
+        document.getElementById('r-date').innerText = entry.date;
+
+        // PDF Generation
+        const el = document.getElementById('receipt-template');
+        el.classList.remove('hidden');
+        setTimeout(() => {
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt_${newReceiptNo}.pdf`).then(() => el.classList.add('hidden'));
+        }, 700);
+
+        alert("Receipt #" + newReceiptNo + " Generated!");
+
+    } catch (e) {
+        console.error("Transaction failed: ", e);
+        alert("Error generating receipt number.");
+    }
+}
 
         async function generateSalarySlip() {
-            const name = document.getElementById('teacherName').value;
-            const total = (parseFloat(document.getElementById('baseSalary').value) || 0) + (parseFloat(document.getElementById('bonus').value) || 0);
-            const date = getDisplayDate('salaryDate');
-            if (!name || total <= 0) return alert("Verify Salary");
+    const name = document.getElementById('teacherName').value;
+    const base = parseFloat(document.getElementById('baseSalary').value) || 0;
+    const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+    const total = base + bonus;
+    const month = document.getElementById('salaryMonth').value;
+    const dept = document.getElementById('subject').value;
 
-            try {
-                const counterRef = db.collection("counters").doc("salary_counter");
-                const nextNum = await db.runTransaction(async (t) => {
-                    const doc = await t.get(counterRef);
-                    let n = doc.data().currentValue + 1;
-                    t.update(counterRef, { currentValue: n });
-                    return n;
-                });
+    if (!name || total <= 0) return alert("Verify Salary");
 
-                document.getElementById('v-id').innerText = "DI-S-" + String(nextNum).padStart(3, '0');
-                document.getElementById('v-name').innerText = name;
-                document.getElementById('v-dept').innerText = document.getElementById('subject').value;
-                document.getElementById('v-total').innerText = total;
-                document.getElementById('v-date').innerText = date;
+    try {
+        // 1. Salary Counter Reference
+        const counterRef = db.collection("counters").doc("salary_counter");
 
-                const el = document.getElementById('salary-template');
-                el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary.pdf`).then(() => el.classList.add('hidden')); }, 800);
-                
-                await db.collection("transactions").add({ name, amount: total, type:'expense', category:'Salary', date, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            } catch (e) { alert("Error generating serial number"); }
-        }
+        // 2. Get Next Serial Number
+        const newVoucherNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) throw "Counter missing!";
+            
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
+
+        // 3. Entry with Serial Number
+        const entry = {
+            voucherNo: newVoucherNo, // Serial Number (1, 2, 3...)
+            name, amount: total, month, category: 'Salary', dept,
+            type: 'expense', date: getToday(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection("transactions").add(entry);
+
+        // 4. UI Update (DI-S-001 format for Salary)
+        document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('v-name').innerText = name;
+        document.getElementById('v-dept').innerText = dept;
+        document.getElementById('v-total').innerText = total;
+        document.getElementById('v-date').innerText = entry.date;
+
+        // 5. PDF Generation
+        const el = document.getElementById('salary-template');
+        el.classList.remove('hidden');
+        setTimeout(() => {
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Voucher_${newVoucherNo}.pdf`).then(() => el.classList.add('hidden'));
+        }, 700);
+
+        alert("Salary Voucher #" + newVoucherNo + " Generated!");
+
+    } catch (e) {
+        console.error(e);
+        alert("Error generating voucher number.");
+    }
+}
 
         function initializeSync() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot(snap => {
                 data = { income: [], expense: [] };
-                snap.forEach(d => { const it = d.data(); (it.type === 'income' ? data.income : data.expense).push(it); });
-                // Dashboard chart update logic here...
+                snap.forEach(d => { const it = d.data(); it.id = d.id; (it.type === 'income' ? data.income : data.expense).push(it); });
+                updateDashboard();
             });
         }
+
+        function updateDashboard() {
+            const inc = data.income.reduce((a, b) => a + b.amount, 0);
+            const exp = data.expense.reduce((a, b) => a + b.amount, 0);
+            document.getElementById('total-income').innerText = `₹${inc}`;
+            document.getElementById('total-expense').innerText = `₹${exp}`;
+            document.getElementById('net-profit').innerText = `₹${inc - exp}`;
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Income', 'Expenses'], datasets: [{ data: [inc, exp], backgroundColor: ['#22c55e', '#ef4444'], borderRadius: 10 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
+        }
+
+        function showDataManager() {
+            showSection('data-manager');
+            const tbody = document.getElementById('manager-table-body');
+            tbody.innerHTML = "";
+            [...data.income, ...data.expense].forEach(item => {
+                tbody.innerHTML += `<tr class="border-b"><td class="p-4 font-bold text-xs ${item.type === 'income' ? 'text-green-600' : 'text-red-600'}">${item.type.toUpperCase()}</td><td class="p-4">${item.name}</td><td class="p-4 text-right font-bold">₹${item.amount}</td><td class="p-4"><button onclick="deleteDoc('${item.id}')" class="text-red-500 underline">Delete</button></td></tr>`;
+            });
+        }
+
+        async function deleteDoc(id) { if(confirm("Permanently delete?")) await db.collection("transactions").doc(id).delete(); }
+
+        function generateMonthlyReport() {
+    const selectedMonth = document.getElementById('reportFilterMonth').value;
+    const tbody = document.getElementById('report-table-body');
+    const totalDisplay = document.getElementById('report-total');
+    
+    tbody.innerHTML = ""; // Clear old data
+    let netBalance = 0;
+
+    // Combine income and expense and filter by month
+    const allTransactions = [...data.income, ...data.expense];
+    const filtered = allTransactions.filter(item => item.month === selectedMonth);
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No transactions found for ${selectedMonth}</td></tr>`;
+        totalDisplay.innerText = "₹0";
+        return;
+    }
+
+    filtered.forEach(item => {
+        const isIncome = item.type === 'income';
+        netBalance += isIncome ? item.amount : -item.amount;
+
+        const row = `
+            <tr class="hover:bg-slate-50 transition">
+                <td class="p-4 text-sm text-slate-600">${item.date}</td>
+                <td class="p-4 font-bold text-slate-800 uppercase">${item.name}</td>
+                <td class="p-4 text-xs font-bold">
+                    <span class="${isIncome ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded">
+                        ${item.category.toUpperCase()}
+                    </span>
+                </td>
+                <td class="p-4 text-right font-black ${isIncome ? 'text-green-600' : 'text-red-600'}">
+                    ${isIncome ? '+' : '-'}₹${item.amount}
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+
+    totalDisplay.innerText = `₹${netBalance}`;
+    totalDisplay.className = `p-5 text-right text-xl font-black ${netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`;
+}
     </script>
 </body>
 </html>
