@@ -90,7 +90,7 @@
                 <li><button onclick="showSection('fee-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Collect Fees</button></li>
                 <li><button onclick="showSection('salary-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Pay Salary</button></li>
                 <li><button onclick="showSection('reports')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Reports</button></li>
-                <li><button onclick="showDataManager()" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg opacity-40">Manage Cloud</button></li>
+                <li><button onclick="showDataManager()" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Manage Cloud</button></li>
             </ul>
         </nav>
 
@@ -215,10 +215,24 @@
                 </div>
             </section>
 
-            <section id="data-manager" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Cloud Database</h2>
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden"><table class="w-full text-left"><tbody id="manager-table-body"></tbody></table></div>
-            </section>
+            <section id="data-manager" class="hidden animate-fade-in">
+    <h2 class="text-2xl font-bold mb-6 text-slate-800 border-b pb-2">Cloud Database Management</h2>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+        <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b">
+                <tr>
+                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Type</th>
+                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Name</th>
+                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Date</th>
+                    <th class="p-4 text-xs font-bold text-slate-500 uppercase text-right">Amount</th>
+                    <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody id="manager-table-body">
+                </tbody>
+        </table>
+    </div>
+</section>
         </main>
     </div>
 
@@ -337,6 +351,68 @@
             } catch (e) { alert("Error: " + e.message); }
         }
 
+        async function generateSalarySlip() {
+    const name = document.getElementById('teacherName').value;
+    const base = parseFloat(document.getElementById('baseSalary').value) || 0;
+    const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+    const total = base + bonus;
+    const month = document.getElementById('salaryMonth').value;
+    const dept = document.getElementById('subject').value;
+
+    if (!name || total <= 0) return alert("Please verify Teacher Name and Salary Amount.");
+
+    try {
+        // Salary Counter Reference from Cloud
+        const counterRef = db.collection("counters").doc("salary_counter");
+
+        // Transaction for Sequential Voucher Number
+        const newVoucherNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) throw "Salary counter document missing in Firestore!";
+            
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
+
+        // Mapping Data to PDF Template
+        document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('v-name').innerText = name;
+        document.getElementById('v-dept').innerText = dept;
+        document.getElementById('v-total').innerText = total;
+        document.getElementById('v-date').innerText = getToday(); // Auto-date for salary
+
+        const el = document.getElementById('salary-template');
+        el.classList.remove('hidden');
+
+        // Generating PDF
+        setTimeout(() => {
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Voucher.pdf`).then(() => {
+                el.classList.add('hidden');
+            });
+        }, 800);
+
+        // Syncing to Cloud
+        await db.collection("transactions").add({
+            name, 
+            amount: total, 
+            month, 
+            category: 'Salary', 
+            dept,
+            type: 'expense', 
+            date: getToday(),
+            voucherNo: newVoucherNo,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("Salary Voucher Generated & Synced!");
+
+    } catch (e) {
+        console.error(e);
+        alert("Error: " + e);
+    }
+}
+
         // Rest of functions remain unchanged...
         function initializeSync() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot(snap => {
@@ -378,6 +454,55 @@
             });
             totalDisplay.innerText = `₹${netBalance}`;
         }
+
+        function showDataManager() {
+    // 1. Pehle section ko screen par layein
+    showSection('data-manager'); 
+
+    // 2. Table body element ko pakdein
+    const tbody = document.getElementById('manager-table-body');
+    tbody.innerHTML = ""; // Purana data saaf karein
+
+    // 3. Saari transactions (Income + Expense) ko combine karke table mein dikhayein
+    const allData = [...data.income, ...data.expense];
+
+    if (allData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Cloud is empty. No transactions found.</td></tr>`;
+        return;
+    }
+
+    allData.forEach(item => {
+        const isIncome = item.type === 'income';
+        tbody.innerHTML += `
+            <tr class="border-b hover:bg-slate-50 transition">
+                <td class="p-4 font-bold text-xs ${isIncome ? 'text-green-600' : 'text-red-600'}">
+                    ${item.type.toUpperCase()}
+                </td>
+                <td class="p-4 text-sm font-semibold uppercase">${item.name}</td>
+                <td class="p-4 text-sm text-slate-500">${item.date}</td>
+                <td class="p-4 text-right font-black">₹${item.amount}</td>
+                <td class="p-4 text-center">
+                    <button onclick="deleteDoc('${item.id}')" class="text-red-500 hover:text-red-700 underline text-xs font-bold">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Delete Function (Cloud se data hatane ke liye)
+async function deleteDoc(id) {
+    if (confirm("Kya aap waqai ise Cloud se permanent delete karna chahte hain?")) {
+        try {
+            await db.collection("transactions").doc(id).delete();
+            alert("Record deleted successfully!");
+            // delete ke baad table automatic refresh ho jayegi onSnapshot ki wajah se
+        } catch (e) {
+            alert("Error deleting record: " + e.message);
+        }
+    }
+}
     </script>
 </body>
 </html>
