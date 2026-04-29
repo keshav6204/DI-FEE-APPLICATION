@@ -278,50 +278,120 @@
 
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-        async function generateFeeReceipt() {
-            const name = document.getElementById('studentName').value;
-            const amount = parseFloat(document.getElementById('feeAmount').value);
-            const sClass = document.getElementById('studentClass').value;
-            const month = document.getElementById('feeMonth').value;
-            if (!name || isNaN(amount)) return alert("Check Details");
+       async function generateFeeReceipt() {
+    const name = document.getElementById('studentName').value;
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+    const sClass = document.getElementById('studentClass').value;
+    const month = document.getElementById('feeMonth').value;
 
-            const entry = { name, amount, class: sClass, month, type: 'income', category: 'Fee', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-            try {
-                const doc = await db.collection("transactions").add(entry);
-                document.getElementById('r-id').innerText = doc.id.substring(0,8).toUpperCase();
-                document.getElementById('r-name').innerText = name;
-                document.getElementById('r-class').innerText = sClass;
-                document.getElementById('r-amount').innerText = amount;
-                document.getElementById('r-month').innerText = month;
-                document.getElementById('r-date').innerText = entry.date;
+    if (!name || isNaN(amount)) return alert("Check Details");
 
-                const el = document.getElementById('receipt-template');
-                el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden')); }, 800);
-            } catch (e) { console.error(e); }
-        }
+    try {
+        // 1. Counter Document ka reference lein
+        const counterRef = db.collection("counters").doc("receipt_counter");
+
+        // 2. Transaction use karein taaki Number clash na ho (Atomic Update)
+        const newReceiptNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) {
+                throw "Counter document does not exist!";
+            }
+
+            // Purane number mein +1 karein
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
+
+        // 3. Entry taiyaar karein naye Serial Number ke saath
+        const entry = {
+            receiptNo: newReceiptNo, // Random ID ki jagah 1, 2, 3...
+            name, amount, class: sClass, month, type: 'income',
+            category: 'Fee', date: getToday(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // 4. Cloud mein save karein
+        await db.collection("transactions").add(entry);
+
+        // 5. UI Update karein (Receipt No ko format karke dikhayein, e.g., DI-001)
+        document.getElementById('r-id').innerText = "DI-" + String(newReceiptNo).padStart(3, '0');
+        document.getElementById('r-name').innerText = name;
+        document.getElementById('r-class').innerText = sClass;
+        document.getElementById('r-amount').innerText = amount;
+        document.getElementById('r-month').innerText = month;
+        document.getElementById('r-date').innerText = entry.date;
+
+        // PDF Generation
+        const el = document.getElementById('receipt-template');
+        el.classList.remove('hidden');
+        setTimeout(() => {
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt_${newReceiptNo}.pdf`).then(() => el.classList.add('hidden'));
+        }, 700);
+
+        alert("Receipt #" + newReceiptNo + " Generated!");
+
+    } catch (e) {
+        console.error("Transaction failed: ", e);
+        alert("Error generating receipt number.");
+    }
+}
 
         async function generateSalarySlip() {
-            const name = document.getElementById('teacherName').value;
-            const total = (parseFloat(document.getElementById('baseSalary').value) || 0) + (parseFloat(document.getElementById('bonus').value) || 0);
-            const dept = document.getElementById('subject').value;
-            const month = document.getElementById('salaryMonth').value;
-            if (!name || total <= 0) return alert("Verify Salary");
+    const name = document.getElementById('teacherName').value;
+    const base = parseFloat(document.getElementById('baseSalary').value) || 0;
+    const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+    const total = base + bonus;
+    const month = document.getElementById('salaryMonth').value;
+    const dept = document.getElementById('subject').value;
 
-            const entry = { name, amount: total, month, category: 'Salary', dept, type: 'expense', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-            try {
-                const doc = await db.collection("transactions").add(entry);
-                document.getElementById('v-id').innerText = doc.id.substring(0,8).toUpperCase();
-                document.getElementById('v-name').innerText = name;
-                document.getElementById('v-dept').innerText = dept;
-                document.getElementById('v-total').innerText = total;
-                document.getElementById('v-date').innerText = entry.date;
+    if (!name || total <= 0) return alert("Verify Salary");
 
-                const el = document.getElementById('salary-template');
-                el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary.pdf`).then(() => el.classList.add('hidden')); }, 800);
-            } catch (e) { console.error(e); }
-        }
+    try {
+        // 1. Salary Counter Reference
+        const counterRef = db.collection("counters").doc("salary_counter");
+
+        // 2. Get Next Serial Number
+        const newVoucherNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) throw "Counter missing!";
+            
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
+
+        // 3. Entry with Serial Number
+        const entry = {
+            voucherNo: newVoucherNo, // Serial Number (1, 2, 3...)
+            name, amount: total, month, category: 'Salary', dept,
+            type: 'expense', date: getToday(),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection("transactions").add(entry);
+
+        // 4. UI Update (DI-S-001 format for Salary)
+        document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('v-name').innerText = name;
+        document.getElementById('v-dept').innerText = dept;
+        document.getElementById('v-total').innerText = total;
+        document.getElementById('v-date').innerText = entry.date;
+
+        // 5. PDF Generation
+        const el = document.getElementById('salary-template');
+        el.classList.remove('hidden');
+        setTimeout(() => {
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Voucher_${newVoucherNo}.pdf`).then(() => el.classList.add('hidden'));
+        }, 700);
+
+        alert("Salary Voucher #" + newVoucherNo + " Generated!");
+
+    } catch (e) {
+        console.error(e);
+        alert("Error generating voucher number.");
+    }
+}
 
         function initializeSync() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot(snap => {
