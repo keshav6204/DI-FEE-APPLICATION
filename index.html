@@ -148,6 +148,7 @@
             <section id="salary-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
                 <h2 class="text-2xl font-bold mb-6 text-red-600">Teacher Salary </h2>
                 <div class="space-y-4">
+                    <input type="text" id="salaryDate" placeholder="Salary Date (DD/MM/YYYY)" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-400 mb-4">
                     <input type="text" id="teacherName" placeholder="Teacher Full Name" class="w-full border p-3 rounded-xl">
                     <input type="text" id="subject" placeholder="Department" class="w-full border p-3 rounded-xl">
                     <input type="number" id="baseSalary" placeholder="Base Salary (₹)" class="w-full border p-3 rounded-xl">
@@ -271,6 +272,58 @@
         </div>
     </div>
 
+    <div id="salary-template" class="hidden">
+    <div class="header-center">
+        <img src="logo.jpeg" class="institute-logo">
+        <div class="institute-name">DEEPAK INSTITUTE</div>
+        <div class="institute-details">
+            Mandawali, West Vinod Nagar, New Delhi 110092 | ☎️ +91 9716263718
+        </div>
+        <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
+    </div>
+
+    <div class="data-row">
+        <span class="data-label">Voucher Number:</span>
+        <span id="v-id" class="data-value text-blue-800"></span>
+    </div>
+    <div class="data-row">
+        <span class="data-label">Payment Date:</span>
+        <span id="v-date" class="data-value"></span>
+    </div>
+    <div class="data-row">
+        <span class="data-label">Employee Name:</span>
+        <span id="v-name" class="data-value uppercase"></span>
+    </div>
+    <div class="data-row">
+        <span class="data-label">Department/Subject:</span>
+        <span id="v-dept" class="data-value"></span>
+    </div>
+    <div class="data-row">
+        <span class="data-label">Salary Month:</span>
+        <span id="v-month" class="data-value font-bold text-slate-600"></span>
+    </div>
+
+    <div class="total-banner" style="background: #0f172a;">
+        <span class="text-lg font-bold opacity-90">NET SALARY DISBURSED</span>
+        <span class="text-5xl font-black italic">₹<span id="v-total"></span></span>
+    </div>
+
+    <div class="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <p class="text-[10px] leading-tight text-gray-600 italic">
+            <strong>Declaration:</strong> This voucher confirms the payment of salary for the mentioned period. 
+            The employee acknowledges receiving the full amount as specified above. This is a computer-generated document.
+        </p>
+    </div>
+
+    <div class="mt-32 flex justify-between px-10">
+        <div class="signature-line">Receiver's Signature</div>
+        <div class="text-center">
+            <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
+            <div class="signature-line">Authorized Signatory</div>
+        </div>
+    </div>
+</div>
+
     <script>
         firebase.auth().onAuthStateChanged(user => {
             const login = document.getElementById('login-screen');
@@ -352,64 +405,74 @@
         }
 
         async function generateSalarySlip() {
+    // 1. Inputs Fetching
+    const sDateInput = document.getElementById('salaryDate').value;
+    const effectiveDate = sDateInput || getToday(); // Agar khali hai toh aaj ki date lega
+    
     const name = document.getElementById('teacherName').value;
     const base = parseFloat(document.getElementById('baseSalary').value) || 0;
     const bonus = parseFloat(document.getElementById('bonus').value) || 0;
-    const total = base + bonus;
+    const totalSalary = base + bonus;
+    
     const month = document.getElementById('salaryMonth').value;
     const dept = document.getElementById('subject').value;
 
-    if (!name || total <= 0) return alert("Please verify Teacher Name and Salary Amount.");
+    // Validation
+    if (!name || totalSalary <= 0) {
+        return alert("Please enter Teacher Name and verify Salary amount.");
+    }
 
     try {
-        // Salary Counter Reference from Cloud
+        // 2. Sequential Voucher Number Logic (Using Firestore Transaction)
         const counterRef = db.collection("counters").doc("salary_counter");
-
-        // Transaction for Sequential Voucher Number
+        
         const newVoucherNo = await db.runTransaction(async (transaction) => {
             const counterDoc = await transaction.get(counterRef);
-            if (!counterDoc.exists) throw "Salary counter document missing in Firestore!";
+            if (!counterDoc.exists) {
+                throw "Salary counter document not found in Cloud! Please create it.";
+            }
             
             let nextNum = counterDoc.data().currentValue + 1;
             transaction.update(counterRef, { currentValue: nextNum });
             return nextNum;
         });
 
-        // Mapping Data to PDF Template
+        // 3. Mapping Data to PDF Template IDs
         document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('v-date').innerText = effectiveDate; // Manual Input Date
         document.getElementById('v-name').innerText = name;
         document.getElementById('v-dept').innerText = dept;
-        document.getElementById('v-total').innerText = total;
-        document.getElementById('v-date').innerText = getToday(); // Auto-date for salary
+        document.getElementById('v-month').innerText = month;
+        document.getElementById('v-total').innerText = totalSalary;
 
+        // 4. PDF Generation Logic
         const el = document.getElementById('salary-template');
-        el.classList.remove('hidden');
+        el.classList.remove('hidden'); // Show template for capturing
 
-        // Generating PDF
         setTimeout(() => {
-            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Voucher.pdf`).then(() => {
-                el.classList.add('hidden');
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Slip_${month}.pdf`).then(() => {
+                el.classList.add('hidden'); // Hide template after download
             });
         }, 800);
 
-        // Syncing to Cloud
+        // 5. Syncing Data to Cloud Database
         await db.collection("transactions").add({
-            name, 
-            amount: total, 
-            month, 
-            category: 'Salary', 
-            dept,
-            type: 'expense', 
-            date: getToday(),
+            name: name,
+            amount: totalSalary,
+            date: effectiveDate,
+            month: month,
+            category: 'Salary',
+            dept: dept,
+            type: 'expense',
             voucherNo: newVoucherNo,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("Salary Voucher Generated & Synced!");
+        alert(`Success! Voucher #DI-S-${String(newVoucherNo).padStart(3, '0')} generated.`);
 
-    } catch (e) {
-        console.error(e);
-        alert("Error: " + e);
+    } catch (error) {
+        console.error("Error generating salary slip:", error);
+        alert("System Error: " + error);
     }
 }
 
