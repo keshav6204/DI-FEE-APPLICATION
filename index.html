@@ -33,32 +33,32 @@
             main { width: 100%; padding: 0; }
         }
 
-        /* FIXED A4 SIZE FOR PDF TO PREVENT CUTTING */
+        /* FIXED CANVAS SIZE FOR PDF ACCURACY */
         #receipt-template, #salary-template {
-            width: 794px; /* A4 Width at 96 DPI */
+            width: 794px; /* A4 Standard Width */
             background: white;
             padding: 50px;
             margin: 0 auto;
             color: black;
         }
 
-        .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px; }
-        .institute-logo { height: 75px; width: auto; margin: 0 auto 10px auto; }
-        .institute-name { font-size: 28px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1px; }
-        .slip-title { background: #f1f5f9; display: inline-block; padding: 5px 20px; border-radius: 20px; font-weight: bold; margin-top: 15px; font-size: 14px; color: #334155; }
+        .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 35px; }
+        .institute-logo { height: 80px; width: auto; margin: 0 auto 12px auto; }
+        .institute-name { font-size: 30px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1px; }
+        .slip-title { background: #f1f5f9; display: inline-block; padding: 6px 25px; border-radius: 25px; font-weight: bold; margin-top: 15px; font-size: 14px; color: #334155; }
         
-        /* FULL WIDTH ROW LAYOUT TO PREVENT OVERLAP */
-        .info-row {
+        /* VERTICAL ROW LAYOUT: PREVENTS ALL OVERLAPPING */
+        .data-row {
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px solid #f1f5f9;
             font-size: 16px;
         }
-        .label { color: #64748b; font-weight: 500; }
-        .value { font-weight: 700; color: #1e293b; text-align: right; }
+        .data-label { color: #64748b; font-weight: 500; }
+        .data-value { font-weight: 700; color: #1e293b; text-align: right; }
 
-        .payment-summary { 
+        .total-banner { 
             background: #1e3a8a; 
             color: white !important; 
             padding: 25px; 
@@ -66,90 +66,91 @@
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-top: 40px;
+            margin-top: 50px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
         }
-        .signature-line { border-top: 1.5px solid #333; width: 180px; margin: 50px auto 5px auto; text-align: center; font-size: 12px; font-weight: bold; }
+        .signature-line { border-top: 2px solid #333; width: 180px; margin: 60px auto 5px auto; text-align: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[100]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 text-center border border-slate-200">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 text-center">
             <img src="logo.jpeg" class="h-20 mx-auto mb-4">
-            <h2 class="text-2xl font-bold mb-6 text-slate-800">Director Login</h2>
+            <h2 class="text-2xl font-bold mb-6">Director Login</h2>
             <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
             <input type="password" id="login-pass" placeholder="Password" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Sign In</button>
-            <p id="login-error" class="text-red-500 mt-2 text-sm hidden font-medium"></p>
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Sign In</button>
+            <p id="login-error" class="text-red-500 mt-2 text-sm hidden"></p>
         </div>
     </div>
 
     <div class="flex flex-col md:flex-row">
         <nav class="w-full md:w-64 bg-slate-800 text-white min-h-screen p-5 shadow-xl no-print">
-            <h1 class="text-2xl font-black mb-10 text-blue-400 border-b border-slate-700 pb-4 tracking-tight">Deepak Institute</h1>
+            <h1 class="text-2xl font-black mb-10 text-blue-400 border-b border-slate-700 pb-4">Deepak Institute</h1>
             <ul class="space-y-4 font-semibold text-sm">
-                <li><button onclick="showSection('dashboard')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Dashboard</button></li>
-                <li><button onclick="showSection('fee-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Collect Fees</button></li>
-                <li><button onclick="showSection('salary-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Pay Salary</button></li>
-                <li><button onclick="showSection('reports')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Monthly Reports</button></li>
-                <li><button onclick="showDataManager()" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition opacity-50">Manage Data</button></li>
+                <li><button onclick="showSection('dashboard')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Dashboard</button></li>
+                <li><button onclick="showSection('fee-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Collect Fees</button></li>
+                <li><button onclick="showSection('salary-form')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Pay Salary</button></li>
+                <li><button onclick="showSection('reports')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg">Reports</button></li>
+                <li><button onclick="showDataManager()" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg opacity-40">Manage Cloud</button></li>
             </ul>
         </nav>
 
         <main class="flex-1 p-6 md:p-10">
             <section id="dashboard" class="block">
-                <h2 class="text-3xl font-extrabold mb-8 text-slate-800">Analytical Dashboard</h2>
+                <h2 class="text-3xl font-extrabold mb-8">Analytical Dashboard</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-green-500">
-                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Total Income</p>
-                        <h3 id="total-income" class="text-3xl font-black text-green-600 mt-1">₹0</h3>
+                        <p class="text-slate-400 uppercase text-xs font-bold">Revenue</p>
+                        <h3 id="total-income" class="text-3xl font-black text-green-600">₹0</h3>
                     </div>
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-red-500">
-                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Expenses</p>
-                        <h3 id="total-expense" class="text-3xl font-black text-red-600 mt-1">₹0</h3>
+                        <p class="text-slate-400 uppercase text-xs font-bold">Expenses</p>
+                        <h3 id="total-expense" class="text-3xl font-black text-red-600">₹0</h3>
                     </div>
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-blue-500">
-                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Net Profit</p>
-                        <h3 id="net-profit" class="text-3xl font-black text-blue-600 mt-1">₹0</h3>
+                        <p class="text-slate-400 uppercase text-xs font-bold">Net Profit</p>
+                        <h3 id="net-profit" class="text-3xl font-black text-blue-600">₹0</h3>
                     </div>
                 </div>
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"><canvas id="financeChart" class="max-h-80"></canvas></div>
             </section>
 
             <section id="fee-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
-                <h2 class="text-2xl font-bold mb-6 text-blue-700">Collect Student Fee</h2>
+                <h2 class="text-2xl font-bold mb-6 text-blue-700">New Fee Collection</h2>
                 <div class="space-y-4">
                     <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="studentClass" placeholder="Class/Batch" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="feeAmount" placeholder="Amount (₹)" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="studentClass" placeholder="Batch/Class" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl">
                     <select id="feeMonth" class="w-full border p-3 rounded-xl">
                         <option value="April 2026">April 2026</option><option value="May 2026">May 2026</option>
                     </select>
-                    <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">Save & Generate PDF</button>
+                    <button onclick="generateFeeReceipt()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">Save & Download PDF</button>
                 </div>
             </section>
 
             <section id="salary-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
-                <h2 class="text-2xl font-bold mb-6 text-red-600">Pay Teacher Salary</h2>
+                <h2 class="text-2xl font-bold mb-6 text-red-600">Teacher Salary Disbursement</h2>
                 <div class="space-y-4">
-                    <input type="text" id="teacherName" placeholder="Name" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="teacherName" placeholder="Teacher Full Name" class="w-full border p-3 rounded-xl">
                     <input type="text" id="subject" placeholder="Department" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="baseSalary" placeholder="Base Amount" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="bonus" placeholder="Bonus/Incentive" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="baseSalary" placeholder="Base Salary (₹)" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="bonus" placeholder="Bonus/Incentive (₹)" class="w-full border p-3 rounded-xl">
                     <select id="salaryMonth" class="w-full border p-3 rounded-xl">
                         <option value="April 2026">April 2026</option>
                     </select>
-                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-700 transition">Generate Salary Slip</button>
+                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-700 transition">Pay & Download Slip</button>
                 </div>
             </section>
 
             <section id="reports" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Financial Reports</h2>
+                <h2 class="text-2xl font-bold mb-6">Monthly Reports</h2>
                 <div id="report-table-body"></div>
             </section>
 
             <section id="data-manager" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Cloud Data Manager</h2>
+                <h2 class="text-2xl font-bold mb-6">Cloud Database</h2>
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden"><table class="w-full text-left"><tbody id="manager-table-body"></tbody></table></div>
             </section>
         </main>
@@ -160,25 +161,25 @@
             <img src="logo.jpeg" class="institute-logo">
             <div class="institute-name">DEEPAK INSTITUTE</div>
             <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | +91 9716263718</div>
-            <div class="slip-title">OFFICIAL FEE RECEIPT</div>
+            <div class="slip-title">STUDENT FEE RECEIPT</div>
         </div>
         
-        <div class="info-row"><span class="label">Receipt No:</span><span id="r-id" class="value"></span></div>
-        <div class="info-row"><span class="label">Date:</span><span id="r-date" class="value"></span></div>
-        <div class="info-row"><span class="label">Student Name:</span><span id="r-name" class="value uppercase"></span></div>
-        <div class="info-row"><span class="label">Class/Batch:</span><span id="r-class" class="value"></span></div>
-        <div class="info-row"><span class="label">For Month:</span><span id="r-month" class="value"></span></div>
+        <div class="data-row"><span class="data-label">Receipt Number:</span><span id="r-id" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Generation Date:</span><span id="r-date" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Student Name:</span><span id="r-name" class="data-value uppercase"></span></div>
+        <div class="data-row"><span class="data-label">Class/Batch:</span><span id="r-class" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Billed Month:</span><span id="r-month" class="data-value"></span></div>
 
-        <div class="payment-summary">
-            <span class="text-xl font-bold">TOTAL AMOUNT PAID</span>
+        <div class="total-banner">
+            <span class="text-xl font-bold">TOTAL PAID AMOUNT</span>
             <span class="text-4xl font-black">₹<span id="r-amount"></span></span>
         </div>
 
-        <div class="mt-32 flex justify-between">
-            <div class="signature-line">Student/Parent Sign</div>
+        <div class="mt-40 flex justify-between">
+            <div class="signature-line">Student/Parent</div>
             <div class="text-center">
                 <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
-                <div class="signature-line">Director Sign</div>
+                <div class="signature-line">Director Authorized</div>
             </div>
         </div>
     </div>
@@ -191,18 +192,18 @@
             <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
         </div>
 
-        <div class="info-row"><span class="label">Voucher ID:</span><span id="v-id" class="value text-blue-700"></span></div>
-        <div class="info-row"><span class="label">Paid Date:</span><span id="v-date" class="value"></span></div>
-        <div class="info-row"><span class="label">Employee Name:</span><span id="v-name" class="value uppercase"></span></div>
-        <div class="info-row"><span class="label">Department:</span><span id="v-dept" class="value"></span></div>
+        <div class="data-row"><span class="data-label">Voucher ID:</span><span id="v-id" class="data-value text-blue-700"></span></div>
+        <div class="data-row"><span class="data-label">Payment Date:</span><span id="v-date" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Employee Name:</span><span id="v-name" class="data-value uppercase"></span></div>
+        <div class="data-row"><span class="data-label">Department:</span><span id="v-dept" class="data-value"></span></div>
 
-        <div class="payment-summary" style="background: #111827;">
+        <div class="total-banner" style="background: #0f172a;">
             <span class="text-lg font-bold opacity-90">NET SALARY PAID</span>
             <span class="text-5xl font-black">₹<span id="v-total"></span></span>
         </div>
 
-        <div class="mt-28 flex justify-between">
-            <div class="signature-line">Receiver Sign</div>
+        <div class="mt-32 flex justify-between">
+            <div class="signature-line">Receiver Signature</div>
             <div class="text-center">
                 <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
                 <div class="signature-line">Authorized Signatory</div>
@@ -211,7 +212,7 @@
     </div>
 
     <script>
-        // Auth Management
+        // Auth Logic
         firebase.auth().onAuthStateChanged(user => {
             const login = document.getElementById('login-screen');
             if (user) { login.classList.add('hidden'); initializeSync(); }
@@ -233,7 +234,7 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-        // Standardized A4 PDF Export Config
+        // A4 Optimized PDF Config
         const pdfOpt = {
             margin: 0,
             image: { type: 'jpeg', quality: 1.0 },
@@ -248,7 +249,7 @@
             const amount = parseFloat(document.getElementById('feeAmount').value);
             const sClass = document.getElementById('studentClass').value;
             const month = document.getElementById('feeMonth').value;
-            if (!name || isNaN(amount)) return alert("Incomplete Details");
+            if (!name || isNaN(amount)) return alert("Check Details");
 
             const entry = { name, amount, class: sClass, month, type: 'income', category: 'Fee', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
             try {
@@ -271,7 +272,7 @@
             const total = (parseFloat(document.getElementById('baseSalary').value) || 0) + (parseFloat(document.getElementById('bonus').value) || 0);
             const dept = document.getElementById('subject').value;
             const month = document.getElementById('salaryMonth').value;
-            if (!name || total <= 0) return alert("Invalid Amount");
+            if (!name || total <= 0) return alert("Verify Salary");
 
             const entry = { name, amount: total, month, category: 'Salary', dept, type: 'expense', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
             try {
@@ -284,7 +285,7 @@
 
                 const el = document.getElementById('salary-template');
                 el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Slip.pdf`).then(() => el.classList.add('hidden')); }, 800);
+                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary.pdf`).then(() => el.classList.add('hidden')); }, 800);
             } catch (e) { console.error(e); }
         }
 
