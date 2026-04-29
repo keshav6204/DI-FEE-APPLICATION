@@ -122,7 +122,12 @@
                 <div class="space-y-4">
                     <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl">
                     <input type="text" id="studentClass" placeholder="Batch/Class" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="feeAmount" placeholder="Amount Paid (₹)" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400">
+
+                <div class="grid grid-cols-2 gap-4">
+    <input type="number" id="remainingBalance" placeholder="Remaining Balance (₹)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-orange-400">
+    <input type="text" id="dueDate" placeholder="Next Due Date (DD/MM)" class="border p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-400">
+</div>
                     <select id="feeMonth" class="w-full border p-3 rounded-xl">
                         <option value="Janurary 2026">Janurary 2026</option>
                         <option value="Februrary 2026">February 2026</option>
@@ -232,6 +237,14 @@
         <div class="data-row"><span class="data-label">Student Name:</span><span id="r-name" class="data-value uppercase"></span></div>
         <div class="data-row"><span class="data-label">Class/Batch:</span><span id="r-class" class="data-value"></span></div>
         <div class="data-row"><span class="data-label">Billed Month:</span><span id="r-month" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Billing Month:</span><span id="r-month" class="data-value"></span></div>
+
+<div class="data-row"><span class="data-label text-orange-600">Remaining Balance:</span><span id="r-remain" class="data-value text-orange-600 font-bold"></span></div>
+
+<div class="data-row bg-red-50 px-2 rounded mt-2">
+    <span class="data-label text-red-700">Next Payment Due Date:</span>
+    <span id="r-due" class="data-value text-red-700 font-black"></span>
+</div>
 
         <div class="total-banner">
             <span class="text-xl font-bold">TOTAL PAID AMOUNT</span>
@@ -315,63 +328,58 @@
 
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-       async function generateFeeReceipt() {
+async function generateFeeReceipt() {
     const name = document.getElementById('studentName').value;
     const amount = parseFloat(document.getElementById('feeAmount').value);
+    
+    // 1. Get New Values from Inputs
+    const remaining = document.getElementById('remainingBalance').value || "0";
+    const nextDue = document.getElementById('dueDate').value || "N/A";
+    
     const sClass = document.getElementById('studentClass').value;
     const month = document.getElementById('feeMonth').value;
+    const effectiveDate = document.getElementById('feeDate').value || new Date().toLocaleDateString('en-GB');
 
-    if (!name || isNaN(amount)) return alert("Check Details");
+    if (!name || isNaN(amount)) return alert("Please fill student details");
 
     try {
-        // 1. Counter Document ka reference lein
         const counterRef = db.collection("counters").doc("receipt_counter");
-
-        // 2. Transaction use karein taaki Number clash na ho (Atomic Update)
-        const newReceiptNo = await db.runTransaction(async (transaction) => {
+        const newVoucherNo = await db.runTransaction(async (transaction) => {
             const counterDoc = await transaction.get(counterRef);
-            if (!counterDoc.exists) {
-                throw "Counter document does not exist!";
-            }
-
-            // Purane number mein +1 karein
             let nextNum = counterDoc.data().currentValue + 1;
             transaction.update(counterRef, { currentValue: nextNum });
             return nextNum;
         });
 
-        // 3. Entry taiyaar karein naye Serial Number ke saath
-        const entry = {
-            receiptNo: newReceiptNo, // Random ID ki jagah 1, 2, 3...
-            name, amount, class: sClass, month, type: 'income',
-            category: 'Fee', date: getToday(),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        // 4. Cloud mein save karein
-        await db.collection("transactions").add(entry);
-
-        // 5. UI Update karein (Receipt No ko format karke dikhayein, e.g., DI-001)
-        document.getElementById('r-id').innerText = "DI-" + String(newReceiptNo).padStart(3, '0');
+        // 2. Reflect on PDF
+        document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
         document.getElementById('r-name').innerText = name;
         document.getElementById('r-class').innerText = sClass;
         document.getElementById('r-amount').innerText = amount;
+        
+        document.getElementById('r-remain').innerText = "₹" + remaining; // Show Balance
+        document.getElementById('r-due').innerText = nextDue; // Show Next Due Date
+        
         document.getElementById('r-month').innerText = month;
-        document.getElementById('r-date').innerText = entry.date;
+        document.getElementById('r-date').innerText = effectiveDate;
 
-        // PDF Generation
         const el = document.getElementById('receipt-template');
         el.classList.remove('hidden');
+        
+        // PDF Generation
         setTimeout(() => {
-            html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt_${newReceiptNo}.pdf`).then(() => el.classList.add('hidden'));
-        }, 700);
+            html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden'));
+        }, 800);
 
-        alert("Receipt #" + newReceiptNo + " Generated!");
+        // 3. Save to Cloud including new fields
+        await db.collection("transactions").add({
+            name, amount, class: sClass, month, date: effectiveDate,
+            remainingBalance: remaining, nextDueDate: nextDue,
+            type: 'income', category: 'Fee', voucherNo: newVoucherNo,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-    } catch (e) {
-        console.error("Transaction failed: ", e);
-        alert("Error generating receipt number.");
-    }
+    } catch (e) { alert("Error: " + e.message); }
 }
 
         async function generateSalarySlip() {
