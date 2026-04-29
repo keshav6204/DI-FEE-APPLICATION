@@ -32,37 +32,60 @@
             nav, button, .no-print { display: none !important; }
             main { width: 100%; padding: 0; }
         }
-        
-        /* Interactive Professional Styles */
+
+        /* FIXED A4 SIZE FOR PDF TO PREVENT CUTTING */
+        #receipt-template, #salary-template {
+            width: 794px; /* A4 Width at 96 DPI */
+            background: white;
+            padding: 50px;
+            margin: 0 auto;
+            color: black;
+        }
+
         .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px; }
         .institute-logo { height: 75px; width: auto; margin: 0 auto 10px auto; }
         .institute-name { font-size: 28px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 1px; }
         .slip-title { background: #f1f5f9; display: inline-block; padding: 5px 20px; border-radius: 20px; font-weight: bold; margin-top: 15px; font-size: 14px; color: #334155; }
         
-        /* Stackable Grid for Mobile PDF */
-        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .detail-item { border-bottom: 1px solid #e2e8f0; padding: 10px 0; display: flex; justify-content: space-between; font-size: 15px; align-items: center; }
-        
-        /* High Visibility Amount Box */
-        .payment-summary { background: #1e3a8a; color: white; padding: 18px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .signature-line { border-top: 1.5px solid #333; width: 160px; margin: 45px auto 5px auto; text-align: center; font-size: 12px; font-weight: bold; }
+        /* FULL WIDTH ROW LAYOUT TO PREVENT OVERLAP */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 16px;
+        }
+        .label { color: #64748b; font-weight: 500; }
+        .value { font-weight: 700; color: #1e293b; text-align: right; }
+
+        .payment-summary { 
+            background: #1e3a8a; 
+            color: white !important; 
+            padding: 25px; 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 40px;
+        }
+        .signature-line { border-top: 1.5px solid #333; width: 180px; margin: 50px auto 5px auto; text-align: center; font-size: 12px; font-weight: bold; }
     </style>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-100 font-sans">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[100]">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 text-center border border-slate-200">
             <img src="logo.jpeg" class="h-20 mx-auto mb-4">
             <h2 class="text-2xl font-bold mb-6 text-slate-800">Director Login</h2>
-            <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 mb-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="password" id="login-pass" placeholder="Password" class="w-full border p-3 mb-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition transform active:scale-95 shadow-lg">Sign In</button>
+            <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="password" id="login-pass" placeholder="Password" class="w-full border p-3 mb-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Sign In</button>
             <p id="login-error" class="text-red-500 mt-2 text-sm hidden font-medium"></p>
         </div>
     </div>
 
     <div class="flex flex-col md:flex-row">
-        <nav class="w-full md:w-64 bg-slate-800 text-white min-h-screen p-5 shadow-2xl">
+        <nav class="w-full md:w-64 bg-slate-800 text-white min-h-screen p-5 shadow-xl no-print">
             <h1 class="text-2xl font-black mb-10 text-blue-400 border-b border-slate-700 pb-4 tracking-tight">Deepak Institute</h1>
             <ul class="space-y-4 font-semibold text-sm">
                 <li><button onclick="showSection('dashboard')" class="w-full text-left hover:bg-slate-700 p-3 rounded-lg transition">Dashboard</button></li>
@@ -75,14 +98,14 @@
 
         <main class="flex-1 p-6 md:p-10">
             <section id="dashboard" class="block">
-                <h2 class="text-3xl font-extrabold mb-8 text-slate-800">Financial Insights</h2>
+                <h2 class="text-3xl font-extrabold mb-8 text-slate-800">Analytical Dashboard</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-green-500">
-                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Revenue</p>
+                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Total Income</p>
                         <h3 id="total-income" class="text-3xl font-black text-green-600 mt-1">₹0</h3>
                     </div>
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-red-500">
-                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Expense</p>
+                        <p class="text-slate-400 uppercase text-xs font-black tracking-widest">Expenses</p>
                         <h3 id="total-expense" class="text-3xl font-black text-red-600 mt-1">₹0</h3>
                     </div>
                     <div class="bg-white p-7 rounded-2xl shadow-sm border-t-4 border-blue-500">
@@ -96,7 +119,7 @@
             <section id="fee-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
                 <h2 class="text-2xl font-bold mb-6 text-blue-700">Collect Student Fee</h2>
                 <div class="space-y-4">
-                    <input type="text" id="studentName" placeholder="Full Name" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="studentName" placeholder="Student Full Name" class="w-full border p-3 rounded-xl">
                     <input type="text" id="studentClass" placeholder="Class/Batch" class="w-full border p-3 rounded-xl">
                     <input type="number" id="feeAmount" placeholder="Amount (₹)" class="w-full border p-3 rounded-xl">
                     <select id="feeMonth" class="w-full border p-3 rounded-xl">
@@ -107,81 +130,88 @@
             </section>
 
             <section id="salary-form" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-xl mx-auto border border-slate-100">
-                <h2 class="text-2xl font-bold mb-6 text-red-600">Teacher Salary Voucher</h2>
+                <h2 class="text-2xl font-bold mb-6 text-red-600">Pay Teacher Salary</h2>
                 <div class="space-y-4">
                     <input type="text" id="teacherName" placeholder="Name" class="w-full border p-3 rounded-xl">
-                    <input type="text" id="subject" placeholder="Dept" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="baseSalary" placeholder="Base (₹)" class="w-full border p-3 rounded-xl">
-                    <input type="number" id="bonus" placeholder="Bonus (₹)" class="w-full border p-3 rounded-xl">
+                    <input type="text" id="subject" placeholder="Department" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="baseSalary" placeholder="Base Amount" class="w-full border p-3 rounded-xl">
+                    <input type="number" id="bonus" placeholder="Bonus/Incentive" class="w-full border p-3 rounded-xl">
                     <select id="salaryMonth" class="w-full border p-3 rounded-xl">
                         <option value="April 2026">April 2026</option>
                     </select>
-                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-700 transition">Pay & Sync</button>
+                    <button onclick="generateSalarySlip()" class="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-red-700 transition">Generate Salary Slip</button>
                 </div>
             </section>
 
             <section id="reports" class="hidden">
-                <h2 class="text-2xl font-bold mb-6">Reports</h2>
+                <h2 class="text-2xl font-bold mb-6">Financial Reports</h2>
                 <div id="report-table-body"></div>
+            </section>
+
+            <section id="data-manager" class="hidden">
+                <h2 class="text-2xl font-bold mb-6">Cloud Data Manager</h2>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden"><table class="w-full text-left"><tbody id="manager-table-body"></tbody></table></div>
             </section>
         </main>
     </div>
 
-    <div id="receipt-template" class="hidden p-12 text-black bg-white w-[210mm] border-2 border-slate-100">
+    <div id="receipt-template" class="hidden">
         <div class="header-center">
             <img src="logo.jpeg" class="institute-logo">
             <div class="institute-name">DEEPAK INSTITUTE</div>
             <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | +91 9716263718</div>
             <div class="slip-title">OFFICIAL FEE RECEIPT</div>
         </div>
-        <div class="details-grid">
-            <div class="detail-item"><span>Receipt No:</span><span id="r-id" class="font-bold"></span></div>
-            <div class="detail-item"><span>Date:</span><span id="r-date" class="font-bold"></span></div>
-            <div class="detail-item"><span>Student:</span><span id="r-name" class="font-bold uppercase"></span></div>
-            <div class="detail-item"><span>Class:</span><span id="r-class" class="font-bold"></span></div>
-            <div class="detail-item"><span>Month:</span><span id="r-month" class="font-bold"></span></div>
+        
+        <div class="info-row"><span class="label">Receipt No:</span><span id="r-id" class="value"></span></div>
+        <div class="info-row"><span class="label">Date:</span><span id="r-date" class="value"></span></div>
+        <div class="info-row"><span class="label">Student Name:</span><span id="r-name" class="value uppercase"></span></div>
+        <div class="info-row"><span class="label">Class/Batch:</span><span id="r-class" class="value"></span></div>
+        <div class="info-row"><span class="label">For Month:</span><span id="r-month" class="value"></span></div>
+
+        <div class="payment-summary">
+            <span class="text-xl font-bold">TOTAL AMOUNT PAID</span>
+            <span class="text-4xl font-black">₹<span id="r-amount"></span></span>
         </div>
-        <div class="payment-summary mt-12 shadow-sm border border-slate-200 text-slate-900 bg-slate-50">
-            <span class="text-lg font-bold">TOTAL AMOUNT PAID</span>
-            <span class="text-4xl font-black italic">₹<span id="r-amount"></span></span>
-        </div>
-        <div class="mt-28 flex justify-between">
+
+        <div class="mt-32 flex justify-between">
             <div class="signature-line">Student/Parent Sign</div>
             <div class="text-center">
-                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
+                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
                 <div class="signature-line">Director Sign</div>
             </div>
         </div>
     </div>
 
-    <div id="salary-template" class="hidden p-12 text-black bg-white w-[210mm] border-2 border-slate-400">
+    <div id="salary-template" class="hidden">
         <div class="header-center">
             <img src="logo.jpeg" class="institute-logo">
             <div class="institute-name">DEEPAK INSTITUTE</div>
             <div class="institute-details">West Vinod Nagar, Mandawali, New Delhi | +91 9716263718</div>
             <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
         </div>
-        <div class="details-grid">
-            <div class="detail-item"><span>Voucher ID:</span><span id="v-id" class="font-bold text-blue-700"></span></div>
-            <div class="detail-item"><span>Paid Date:</span><span id="v-date" class="font-bold"></span></div>
-            <div class="detail-item"><span>Employee:</span><span id="v-name" class="font-bold uppercase"></span></div>
-            <div class="detail-item"><span>Department:</span><span id="v-dept" class="font-bold"></span></div>
+
+        <div class="info-row"><span class="label">Voucher ID:</span><span id="v-id" class="value text-blue-700"></span></div>
+        <div class="info-row"><span class="label">Paid Date:</span><span id="v-date" class="value"></span></div>
+        <div class="info-row"><span class="label">Employee Name:</span><span id="v-name" class="value uppercase"></span></div>
+        <div class="info-row"><span class="label">Department:</span><span id="v-dept" class="value"></span></div>
+
+        <div class="payment-summary" style="background: #111827;">
+            <span class="text-lg font-bold opacity-90">NET SALARY PAID</span>
+            <span class="text-5xl font-black">₹<span id="v-total"></span></span>
         </div>
-        <div class="payment-summary mt-8 shadow-xl bg-blue-900 text-white">
-            <span class="text-sm font-bold uppercase tracking-widest opacity-80">Net Salary Paid</span>
-            <span class="text-5xl font-black italic">₹<span id="v-total"></span></span>
-        </div>
-        <div class="mt-24 flex justify-between">
+
+        <div class="mt-28 flex justify-between">
             <div class="signature-line">Receiver Sign</div>
             <div class="text-center">
-                <img src="sign.jpeg" class="h-14 mx-auto mb-[-10px]">
+                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px]">
                 <div class="signature-line">Authorized Signatory</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Auth Logic
+        // Auth Management
         firebase.auth().onAuthStateChanged(user => {
             const login = document.getElementById('login-screen');
             if (user) { login.classList.add('hidden'); initializeSync(); }
@@ -203,10 +233,10 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-        // iPhone Optimized PDF Settings
+        // Standardized A4 PDF Export Config
         const pdfOpt = {
-            margin: 10,
-            image: { type: 'jpeg', quality: 0.98 },
+            margin: 0,
+            image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
@@ -218,7 +248,7 @@
             const amount = parseFloat(document.getElementById('feeAmount').value);
             const sClass = document.getElementById('studentClass').value;
             const month = document.getElementById('feeMonth').value;
-            if (!name || isNaN(amount)) return alert("Check Details");
+            if (!name || isNaN(amount)) return alert("Incomplete Details");
 
             const entry = { name, amount, class: sClass, month, type: 'income', category: 'Fee', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
             try {
@@ -232,7 +262,7 @@
 
                 const el = document.getElementById('receipt-template');
                 el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden')); }, 700);
+                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden')); }, 800);
             } catch (e) { console.error(e); }
         }
 
@@ -241,7 +271,7 @@
             const total = (parseFloat(document.getElementById('baseSalary').value) || 0) + (parseFloat(document.getElementById('bonus').value) || 0);
             const dept = document.getElementById('subject').value;
             const month = document.getElementById('salaryMonth').value;
-            if (!name || total <= 0) return alert("Verify Salary");
+            if (!name || total <= 0) return alert("Invalid Amount");
 
             const entry = { name, amount: total, month, category: 'Salary', dept, type: 'expense', date: getToday(), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
             try {
@@ -254,7 +284,7 @@
 
                 const el = document.getElementById('salary-template');
                 el.classList.remove('hidden');
-                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary.pdf`).then(() => el.classList.add('hidden')); }, 700);
+                setTimeout(() => { html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Slip.pdf`).then(() => el.classList.add('hidden')); }, 800);
             } catch (e) { console.error(e); }
         }
 
@@ -274,7 +304,7 @@
             document.getElementById('net-profit').innerText = `₹${inc - exp}`;
             const ctx = document.getElementById('financeChart').getContext('2d');
             if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Revenue', 'Expenses'], datasets: [{ data: [inc, exp], backgroundColor: ['#22c55e', '#ef4444'], borderRadius: 10 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
+            myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Income', 'Expenses'], datasets: [{ data: [inc, exp], backgroundColor: ['#22c55e', '#ef4444'], borderRadius: 10 }] }, options: { plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } });
         }
 
         function showDataManager() {
@@ -286,7 +316,7 @@
             });
         }
 
-        async function deleteDoc(id) { if(confirm("Cloud se permanent delete?")) await db.collection("transactions").doc(id).delete(); }
+        async function deleteDoc(id) { if(confirm("Permanently delete?")) await db.collection("transactions").doc(id).delete(); }
     </script>
 </body>
 </html>
