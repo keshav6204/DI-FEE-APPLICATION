@@ -33,13 +33,18 @@
             main { width: 100%; padding: 0; }
         }
 
-        #receipt-template, #salary-template {
-            width: 794px; 
-            background: white;
-            padding: 50px;
-            margin: 0 auto;
-            color: black;
-        }
+       #receipt-template, #salary-template {
+    width: 794px !important;  /* A4 Width in Pixels */
+    min-height: 1120px !important; /* A4 Height */
+    padding: 40px !important;
+    background: white !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    overflow: hidden !important;
+    /* टेक्स्ट को कटने से रोकने के लिए */
+    word-wrap: break-word;
+}
 
         .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 35px; }
         .institute-logo { height: 80px; width: auto; margin: 0 auto 12px auto; }
@@ -346,63 +351,105 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-        const pdfOpt = {
-            margin: 0,
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+       const pdfOpt = {
+    margin: [10, 5, 10, 5], // Top, Left, Bottom, Right
+    filename: 'Deepak_Institute_Receipt.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+        scale: 2, // क्वालिटी बढ़ाने के लिए
+        useCORS: true, 
+        letterRendering: true,
+        windowWidth: 794, // सबसे जरूरी: विड्थ को 794px पर फिक्स कर देता है
+        scrollY: 0,
+        scrollX: 0
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+};
 
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-        async function generateFeeReceipt() {
-            const name = document.getElementById('studentName').value;
-            const amount = parseFloat(document.getElementById('feeAmount').value);
-            const remaining = document.getElementById('remainingBalance').value || "0";
-            const nextDue = document.getElementById('dueDate').value || "N/A";
-            const sClass = document.getElementById('studentClass').value;
-            const month = document.getElementById('feeMonth').value;
-            
-            // DIRECTOR INPUT DATE FEATURE
-            const inputDate = document.getElementById('feeDate').value;
-            const effectiveDate = inputDate || getToday();
+       async function generateFeeReceipt() {
+    const name = document.getElementById('studentName').value;
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+    const remaining = document.getElementById('remainingBalance').value || "0";
+    const nextDue = document.getElementById('dueDate').value || "N/A";
+    const sClass = document.getElementById('studentClass').value;
+    const month = document.getElementById('feeMonth').value;
+    
+    // Director manual date entry
+    const inputDate = document.getElementById('feeDate').value;
+    const effectiveDate = inputDate || getToday();
 
-            if (!name || isNaN(amount)) return alert("Please fill student details");
+    if (!name || isNaN(amount)) return alert("Please fill student details");
 
-            try {
-                const counterRef = db.collection("counters").doc("receipt_counter");
-                const newVoucherNo = await db.runTransaction(async (transaction) => {
-                    const counterDoc = await transaction.get(counterRef);
-                    let nextNum = counterDoc.data().currentValue + 1;
-                    transaction.update(counterRef, { currentValue: nextNum });
-                    return nextNum;
-                });
+    try {
+        // 1. Sequential Numbering Logic (Firestore Transaction)
+        const counterRef = db.collection("counters").doc("receipt_counter");
+        const newVoucherNo = await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            if (!counterDoc.exists) throw "Counter missing!";
+            let nextNum = counterDoc.data().currentValue + 1;
+            transaction.update(counterRef, { currentValue: nextNum });
+            return nextNum;
+        });
 
-                document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
-                document.getElementById('r-name').innerText = name;
-                document.getElementById('r-class').innerText = sClass;
-                document.getElementById('r-amount').innerText = amount;
-                document.getElementById('r-remain').innerText = "₹" + remaining;
-                document.getElementById('r-due').innerText = nextDue;
-                document.getElementById('r-month').innerText = month;
-                document.getElementById('r-date').innerText = effectiveDate;
+        // 2. Data Mapping to Template
+        document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('r-name').innerText = name;
+        document.getElementById('r-class').innerText = sClass;
+        document.getElementById('r-amount').innerText = amount;
+        document.getElementById('r-remain').innerText = "₹" + remaining;
+        document.getElementById('r-due').innerText = nextDue;
+        document.getElementById('r-month').innerText = month;
+        document.getElementById('r-date').innerText = effectiveDate;
 
-                const el = document.getElementById('receipt-template');
-                el.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden'));
-                }, 800);
+        // 3. STEP 3: HIDDEN CONTAINER LOGIC (Resolves Cutting in iPhone/Android)
+        const el = document.getElementById('receipt-template');
+        
+        // Template ko temporarily force-display karein rendering engine ke liye
+        el.style.display = 'block';
+        el.classList.remove('hidden');
 
-                await db.collection("transactions").add({
-                    name, amount, class: sClass, month, date: effectiveDate,
-                    remainingBalance: remaining, nextDueDate: nextDue,
-                    type: 'income', category: 'Fee', voucherNo: newVoucherNo,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+        // PDF Generation with Promise handling
+        await html2pdf().set({
+            margin: [10, 5, 10, 5],
+            filename: `${name}_Receipt.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                windowWidth: 794 // Layout ko A4 size par lock karta hai
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(el).toPdf().get('pdf').then(function (pdf) {
+            // PDF generate hone ke baad wapis hide karein
+            el.style.display = 'none';
+            el.classList.add('hidden');
+        }).save();
 
-            } catch (e) { alert("Error: " + e.message); }
-        }
+        // 4. Final Sync to Cloud
+        await db.collection("transactions").add({
+            name, 
+            amount, 
+            class: sClass, 
+            month, 
+            date: effectiveDate,
+            remainingBalance: remaining, 
+            nextDueDate: nextDue,
+            type: 'income', 
+            category: 'Fee', 
+            voucherNo: newVoucherNo,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        console.log("Sync Complete: Receipt #" + newVoucherNo);
+
+    } catch (e) { 
+        alert("System Error: " + e.message); 
+        console.error(e);
+    }
+}
 
         async function generateSalarySlip() {
     // 1. Inputs Fetching
