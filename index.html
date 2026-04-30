@@ -345,56 +345,83 @@
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
         async function generateFeeReceipt() {
-            const name = document.getElementById('studentName').value;
-            const amount = parseFloat(document.getElementById('feeAmount').value);
-            const remaining = document.getElementById('remainingBalance').value || "0";
-            const nextDue = document.getElementById('dueDate').value || "N/A";
-            const sClass = document.getElementById('studentClass').value;
-            const month = document.getElementById('feeMonth').value;
-            const inputDate = document.getElementById('feeDate').value;
-            const effectiveDate = inputDate || getToday();
+    const name = document.getElementById('studentName').value;
+    const amount = parseFloat(document.getElementById('feeAmount').value);
+    const remaining = document.getElementById('remainingBalance').value || "0";
+    const nextDue = document.getElementById('dueDate').value || "N/A";
+    const sClass = document.getElementById('studentClass').value;
+    const month = document.getElementById('feeMonth').value;
+    const inputDate = document.getElementById('feeDate').value;
+    const effectiveDate = inputDate || getToday();
 
-            if (!name || isNaN(amount)) return alert("Please fill student details");
+    if (!name || isNaN(amount)) return alert("Fill all details first!");
 
-            try {
-                const counterRef = db.collection("counters").doc("receipt_counter");
-                const newVoucherNo = await db.runTransaction(async (transaction) => {
-                    const counterDoc = await transaction.get(counterRef);
-                    let nextNum = counterDoc.data().currentValue + 1;
-                    transaction.update(counterRef, { currentValue: nextNum });
-                    return nextNum;
-                });
+    try {
+        // Sequential Number Logic
+        const counterRef = db.collection("counters").doc("receipt_counter");
+        const newVoucherNo = await db.runTransaction(async (t) => {
+            const doc = await t.get(counterRef);
+            let n = doc.data().currentValue + 1;
+            t.update(counterRef, { currentValue: n });
+            return n;
+        });
 
-                document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
-                document.getElementById('r-name').innerText = name;
-                document.getElementById('r-class').innerText = sClass;
-                document.getElementById('r-amount').innerText = amount;
-                document.getElementById('r-remain').innerText = "₹" + remaining;
-                document.getElementById('r-due').innerText = nextDue;
-                document.getElementById('r-month').innerText = month;
-                document.getElementById('r-date').innerText = effectiveDate;
+        // Mapping to Template
+        document.getElementById('r-id').innerText = "DI-" + String(newVoucherNo).padStart(3, '0');
+        document.getElementById('r-name').innerText = name;
+        document.getElementById('r-class').innerText = sClass;
+        document.getElementById('r-amount').innerText = amount;
+        document.getElementById('r-remain').innerText = "₹" + remaining;
+        document.getElementById('r-due').innerText = nextDue;
+        document.getElementById('r-month').innerText = month;
+        document.getElementById('r-date').innerText = effectiveDate;
 
-                const el = document.getElementById('receipt-template');
-                
-                // GENUINE FIX: Explicit display and Promise-based hidden logic
-                el.style.display = 'block';
-                el.classList.remove('hidden');
+        // --- MASTER FIX START ---
+        const element = document.getElementById('receipt-template');
+        
+        // Clone the element to avoid moving the original
+        const clone = element.cloneNode(true);
+        clone.style.display = "block";
+        clone.style.position = "absolute";
+        clone.style.top = "0";
+        clone.style.left = "0";
+        clone.style.width = "794px"; // Hardcoded A4 Width
+        clone.style.zIndex = "-1000";
+        clone.classList.remove('hidden');
+        
+        // Append to body temporarily
+        document.body.appendChild(clone);
 
-                html2pdf().set(pdfOpt).from(el).toPdf().get('pdf').then(function (pdf) {
-                    el.style.display = 'none';
-                    el.classList.add('hidden');
-                }).save(`${name}_Receipt.pdf`);
+        const opt = {
+            margin: 0,
+            filename: `${name}_Receipt.pdf`,
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                logging: false,
+                width: 794, // Force canvas width
+                windowWidth: 794 // Force browser window width for rander
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-                await db.collection("transactions").add({
-                    name, amount, class: sClass, month, date: effectiveDate,
-                    remainingBalance: remaining, nextDueDate: nextDue,
-                    type: 'income', category: 'Fee', voucherNo: newVoucherNo,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+        // Render from the CLONE, not the original hidden element
+        await html2pdf().set(opt).from(clone).save();
 
-            } catch (e) { alert("Error: " + e.message); }
-        }
+        // Remove clone after saving
+        document.body.removeChild(clone);
+        // --- MASTER FIX END ---
 
+        // Sync to Cloud
+        await db.collection("transactions").add({
+            name, amount, class: sClass, month, date: effectiveDate,
+            type: 'income', category: 'Fee', voucherNo: newVoucherNo,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+    } catch (e) { alert("Error: " + e.message); }
+}
         async function generateSalarySlip() {
             const sDateInput = document.getElementById('salaryDate').value;
             const effectiveDate = sDateInput || getToday();
