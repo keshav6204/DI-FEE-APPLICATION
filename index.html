@@ -352,10 +352,10 @@
     html2canvas: { 
         scale: 2, // क्वालिटी बढ़ाने के लिए
         useCORS: true, 
-        letterRendering: true,
+        letterRendering: true
+        },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-};
-
+    };
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
        async function generateFeeReceipt() {
