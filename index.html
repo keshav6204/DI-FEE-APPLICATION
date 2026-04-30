@@ -33,13 +33,19 @@
             main { width: 100%; padding: 0; }
         }
 
-       #receipt-template, #salary-template {
-    width: 794px;
-    background: white;
-    padding: 50px;
-    margin: 0 auto;
-    color: black;
-}
+        /* GENUINE SOLUTION: Fixed Width for all devices */
+        #receipt-template, #salary-template {
+            width: 794px !important;
+            min-width: 794px !important;
+            background: white !important;
+            padding: 50px !important;
+            margin: 0 auto !important;
+            color: black !important;
+            box-sizing: border-box !important;
+            word-wrap: break-word;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact;
+        }
 
         .header-center { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 35px; }
         .institute-logo { height: 80px; width: auto; margin: 0 auto 12px auto; }
@@ -217,23 +223,22 @@
             </section>
 
             <section id="data-manager" class="hidden animate-fade-in">
-    <h2 class="text-2xl font-bold mb-6 text-slate-800 border-b pb-2">Cloud Database Management</h2>
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
-        <table class="w-full text-left">
-            <thead class="bg-slate-50 border-b">
-                <tr>
-                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Type</th>
-                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Name</th>
-                    <th class="p-4 text-xs font-bold text-slate-500 uppercase">Date</th>
-                    <th class="p-4 text-xs font-bold text-slate-500 uppercase text-right">Amount</th>
-                    <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody id="manager-table-body">
-                </tbody>
-        </table>
-    </div>
-</section>
+                <h2 class="text-2xl font-bold mb-6 text-slate-800 border-b pb-2">Cloud Database Management</h2>
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Type</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Name</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase">Date</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase text-right">Amount</th>
+                                <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manager-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -273,56 +278,34 @@
     </div>
 
     <div id="salary-template" class="hidden">
-    <div class="header-center">
-        <img src="logo.jpeg" class="institute-logo">
-        <div class="institute-name">DEEPAK INSTITUTE</div>
-        <div class="institute-details">
-            Mandawali, West Vinod Nagar, New Delhi 110092 | ☎️ +91 9716263718
+        <div class="header-center">
+            <img src="logo.jpeg" class="institute-logo">
+            <div class="institute-name">DEEPAK INSTITUTE</div>
+            <div class="institute-details">Mandawali, West Vinod Nagar, New Delhi 110092 | ☎️ +91 9716263718</div>
+            <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
         </div>
-        <div class="slip-title">SALARY DISBURSEMENT VOUCHER</div>
-    </div>
-
-    <div class="data-row">
-        <span class="data-label">Voucher Number:</span>
-        <span id="v-id" class="data-value text-blue-800"></span>
-    </div>
-    <div class="data-row">
-        <span class="data-label">Payment Date:</span>
-        <span id="v-date" class="data-value"></span>
-    </div>
-    <div class="data-row">
-        <span class="data-label">Employee Name:</span>
-        <span id="v-name" class="data-value uppercase"></span>
-    </div>
-    <div class="data-row">
-        <span class="data-label">Department/Subject:</span>
-        <span id="v-dept" class="data-value"></span>
-    </div>
-    <div class="data-row">
-        <span class="data-label">Salary Month:</span>
-        <span id="v-month" class="data-value font-bold text-slate-600"></span>
-    </div>
-
-    <div class="total-banner" style="background: #0f172a;">
-        <span class="text-lg font-bold opacity-90">NET SALARY DISBURSED</span>
-        <span class="text-5xl font-black italic">₹<span id="v-total"></span></span>
-    </div>
-
-    <div class="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <p class="text-[10px] leading-tight text-gray-600 italic">
-            <strong>Declaration:</strong> This voucher confirms the payment of salary for the mentioned period. 
-            The employee acknowledges receiving the full amount as specified above. This is a computer-generated document.
-        </p>
-    </div>
-
-    <div class="mt-32 flex justify-between px-10">
-        <div class="signature-line">Receiver's Signature</div>
-        <div class="text-center">
-            <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
-            <div class="signature-line">Authorized Signatory</div>
+        <div class="data-row"><span class="data-label">Voucher Number:</span><span id="v-id" class="data-value text-blue-800"></span></div>
+        <div class="data-row"><span class="data-label">Payment Date:</span><span id="v-date" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Employee Name:</span><span id="v-name" class="data-value uppercase"></span></div>
+        <div class="data-row"><span class="data-label">Department/Subject:</span><span id="v-dept" class="data-value"></span></div>
+        <div class="data-row"><span class="data-label">Salary Month:</span><span id="v-month" class="data-value font-bold text-slate-600"></span></div>
+        <div class="total-banner" style="background: #0f172a;">
+            <span class="text-lg font-bold opacity-90">NET SALARY DISBURSED</span>
+            <span class="text-5xl font-black italic">₹<span id="v-total"></span></span>
+        </div>
+        <div class="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <p class="text-[10px] leading-tight text-gray-600 italic">
+                <strong>Declaration:</strong> This voucher confirms the payment of salary for the mentioned period. The employee acknowledges receiving the full amount as specified above. This is a computer-generated document.
+            </p>
+        </div>
+        <div class="mt-32 flex justify-between px-10">
+            <div class="signature-line">Receiver's Signature</div>
+            <div class="text-center">
+                <img src="sign.jpeg" class="h-14 mx-auto mb-[-12px] scale-125">
+                <div class="signature-line">Authorized Signatory</div>
+            </div>
         </div>
     </div>
-</div>
 
     <script>
         firebase.auth().onAuthStateChanged(user => {
@@ -346,27 +329,28 @@
             document.getElementById(id).classList.remove('hidden');
         }
 
-       const pdfOpt = {
-    margin: 0,
-    image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { 
-        scale: 2, // क्वालिटी बढ़ाने के लिए
-        useCORS: true, 
-        letterRendering: true
-        },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+        // GENUINE FIX: Shared PDF Options with windowWidth locking
+        const pdfOpt = {
+            margin: 0,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                windowWidth: 794 // LOCK LAYOUT to A4 pixels
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
         const getToday = () => new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-       async function generateFeeReceipt() {
+        async function generateFeeReceipt() {
             const name = document.getElementById('studentName').value;
             const amount = parseFloat(document.getElementById('feeAmount').value);
             const remaining = document.getElementById('remainingBalance').value || "0";
             const nextDue = document.getElementById('dueDate').value || "N/A";
             const sClass = document.getElementById('studentClass').value;
             const month = document.getElementById('feeMonth').value;
-            
-            // DIRECTOR INPUT DATE FEATURE
             const inputDate = document.getElementById('feeDate').value;
             const effectiveDate = inputDate || getToday();
 
@@ -391,11 +375,15 @@
                 document.getElementById('r-date').innerText = effectiveDate;
 
                 const el = document.getElementById('receipt-template');
-                el.classList.remove('hidden');
                 
-                setTimeout(() => {
-                    html2pdf().set(pdfOpt).from(el).save(`${name}_Receipt.pdf`).then(() => el.classList.add('hidden'));
-                }, 800);
+                // GENUINE FIX: Explicit display and Promise-based hidden logic
+                el.style.display = 'block';
+                el.classList.remove('hidden');
+
+                html2pdf().set(pdfOpt).from(el).toPdf().get('pdf').then(function (pdf) {
+                    el.style.display = 'none';
+                    el.classList.add('hidden');
+                }).save(`${name}_Receipt.pdf`);
 
                 await db.collection("transactions").add({
                     name, amount, class: sClass, month, date: effectiveDate,
@@ -408,78 +396,53 @@
         }
 
         async function generateSalarySlip() {
-    // 1. Inputs Fetching
-    const sDateInput = document.getElementById('salaryDate').value;
-    const effectiveDate = sDateInput || getToday(); // Agar khali hai toh aaj ki date lega
-    
-    const name = document.getElementById('teacherName').value;
-    const base = parseFloat(document.getElementById('baseSalary').value) || 0;
-    const bonus = parseFloat(document.getElementById('bonus').value) || 0;
-    const totalSalary = base + bonus;
-    
-    const month = document.getElementById('salaryMonth').value;
-    const dept = document.getElementById('subject').value;
+            const sDateInput = document.getElementById('salaryDate').value;
+            const effectiveDate = sDateInput || getToday();
+            const name = document.getElementById('teacherName').value;
+            const base = parseFloat(document.getElementById('baseSalary').value) || 0;
+            const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+            const totalSalary = base + bonus;
+            const month = document.getElementById('salaryMonth').value;
+            const dept = document.getElementById('subject').value;
 
-    // Validation
-    if (!name || totalSalary <= 0) {
-        return alert("Please enter Teacher Name and verify Salary amount.");
-    }
+            if (!name || totalSalary <= 0) return alert("Please enter Teacher Name and verify Salary amount.");
 
-    try {
-        // 2. Sequential Voucher Number Logic (Using Firestore Transaction)
-        const counterRef = db.collection("counters").doc("salary_counter");
-        
-        const newVoucherNo = await db.runTransaction(async (transaction) => {
-            const counterDoc = await transaction.get(counterRef);
-            if (!counterDoc.exists) {
-                throw "Salary counter document not found in Cloud! Please create it.";
-            }
-            
-            let nextNum = counterDoc.data().currentValue + 1;
-            transaction.update(counterRef, { currentValue: nextNum });
-            return nextNum;
-        });
+            try {
+                const counterRef = db.collection("counters").doc("salary_counter");
+                const newVoucherNo = await db.runTransaction(async (transaction) => {
+                    const counterDoc = await transaction.get(counterRef);
+                    let nextNum = counterDoc.data().currentValue + 1;
+                    transaction.update(counterRef, { currentValue: nextNum });
+                    return nextNum;
+                });
 
-        // 3. Mapping Data to PDF Template IDs
-        document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
-        document.getElementById('v-date').innerText = effectiveDate; // Manual Input Date
-        document.getElementById('v-name').innerText = name;
-        document.getElementById('v-dept').innerText = dept;
-        document.getElementById('v-month').innerText = month;
-        document.getElementById('v-total').innerText = totalSalary;
+                document.getElementById('v-id').innerText = "DI-S-" + String(newVoucherNo).padStart(3, '0');
+                document.getElementById('v-date').innerText = effectiveDate;
+                document.getElementById('v-name').innerText = name;
+                document.getElementById('v-dept').innerText = dept;
+                document.getElementById('v-month').innerText = month;
+                document.getElementById('v-total').innerText = totalSalary;
 
-        // 4. PDF Generation Logic
-        const el = document.getElementById('salary-template');
-        el.classList.remove('hidden'); // Show template for capturing
+                const el = document.getElementById('salary-template');
+                
+                // GENUINE FIX: Same layout locking for Salary
+                el.style.display = 'block';
+                el.classList.remove('hidden');
 
-        setTimeout(() => {
-            html2pdf().set(pdfOpt).from(el).save(`${name}_Salary_Slip_${month}.pdf`).then(() => {
-                el.classList.add('hidden'); // Hide template after download
-            });
-        }, 800);
+                html2pdf().set(pdfOpt).from(el).toPdf().get('pdf').then(function (pdf) {
+                    el.style.display = 'none';
+                    el.classList.add('hidden');
+                }).save(`${name}_Salary_Slip_${month}.pdf`);
 
-        // 5. Syncing Data to Cloud Database
-        await db.collection("transactions").add({
-            name: name,
-            amount: totalSalary,
-            date: effectiveDate,
-            month: month,
-            category: 'Salary',
-            dept: dept,
-            type: 'expense',
-            voucherNo: newVoucherNo,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
+                await db.collection("transactions").add({
+                    name: name, amount: totalSalary, date: effectiveDate, month: month,
+                    category: 'Salary', dept: dept, type: 'expense', voucherNo: newVoucherNo,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
 
-        alert(`Success! Voucher #DI-S-${String(newVoucherNo).padStart(3, '0')} generated.`);
+            } catch (error) { alert("System Error: " + error); }
+        }
 
-    } catch (error) {
-        console.error("Error generating salary slip:", error);
-        alert("System Error: " + error);
-    }
-}
-
-        // Rest of functions remain unchanged...
         function initializeSync() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot(snap => {
                 data = { income: [], expense: [] };
@@ -522,53 +485,33 @@
         }
 
         function showDataManager() {
-    // 1. Pehle section ko screen par layein
-    showSection('data-manager'); 
-
-    // 2. Table body element ko pakdein
-    const tbody = document.getElementById('manager-table-body');
-    tbody.innerHTML = ""; // Purana data saaf karein
-
-    // 3. Saari transactions (Income + Expense) ko combine karke table mein dikhayein
-    const allData = [...data.income, ...data.expense];
-
-    if (allData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Cloud is empty. No transactions found.</td></tr>`;
-        return;
-    }
-
-    allData.forEach(item => {
-        const isIncome = item.type === 'income';
-        tbody.innerHTML += `
-            <tr class="border-b hover:bg-slate-50 transition">
-                <td class="p-4 font-bold text-xs ${isIncome ? 'text-green-600' : 'text-red-600'}">
-                    ${item.type.toUpperCase()}
-                </td>
-                <td class="p-4 text-sm font-semibold uppercase">${item.name}</td>
-                <td class="p-4 text-sm text-slate-500">${item.date}</td>
-                <td class="p-4 text-right font-black">₹${item.amount}</td>
-                <td class="p-4 text-center">
-                    <button onclick="deleteDoc('${item.id}')" class="text-red-500 hover:text-red-700 underline text-xs font-bold">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-// Delete Function (Cloud se data hatane ke liye)
-async function deleteDoc(id) {
-    if (confirm("Kya aap waqai ise Cloud se permanent delete karna chahte hain?")) {
-        try {
-            await db.collection("transactions").doc(id).delete();
-            alert("Record deleted successfully!");
-            // delete ke baad table automatic refresh ho jayegi onSnapshot ki wajah se
-        } catch (e) {
-            alert("Error deleting record: " + e.message);
+            showSection('data-manager'); 
+            const tbody = document.getElementById('manager-table-body');
+            tbody.innerHTML = "";
+            const allData = [...data.income, ...data.expense];
+            if (allData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 italic">No transactions found.</td></tr>`;
+                return;
+            }
+            allData.forEach(item => {
+                const isIncome = item.type === 'income';
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50 transition">
+                        <td class="p-4 font-bold text-xs ${isIncome ? 'text-green-600' : 'text-red-600'}">${item.type.toUpperCase()}</td>
+                        <td class="p-4 text-sm font-semibold uppercase">${item.name}</td>
+                        <td class="p-4 text-sm text-slate-500">${item.date}</td>
+                        <td class="p-4 text-right font-black">₹${item.amount}</td>
+                        <td class="p-4 text-center"><button onclick="deleteDoc('${item.id}')" class="text-red-500 underline text-xs font-bold">Delete</button></td>
+                    </tr>`;
+            });
         }
-    }
-}
+
+        async function deleteDoc(id) {
+            if (confirm("Permanently delete from cloud?")) {
+                try { await db.collection("transactions").doc(id).delete(); alert("Deleted!"); }
+                catch (e) { alert("Error: " + e.message); }
+            }
+        }
     </script>
 </body>
 </html>
